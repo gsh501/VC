@@ -1,0 +1,40 @@
+# 编译缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VSCode / Cursor 编辑器配置
+.agents/
+.codex
+.vscode/
+.idea/
+
+# 训练权重、断点（体积极大，绝不上传GitHub）
+checkpoints/
+pretrained/
+
+# 视频数据集与测试视频（文件超大）
+video/
+video1/
+video2/
+video3/
+video4/
+
+# 实验输出结果、冗余分析日志
+channel_redundancy_results/
+
+# 旧版废弃训练代码
+old_train/
+
+# 数据集原始数据（按需，data里如果是训练数据集就忽略）
+data/
+
+# 日志、临时文件
+*.log
+*.tmp
+*.bak
+
+# 系统隐藏文件
+.DS_Store
+Thumbs.db
