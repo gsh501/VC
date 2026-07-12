@@ -81,7 +81,7 @@ class CrossChunkContextGeneration(nn.Module):
         ctx = self.conv2(h1)
         return ctx
 
-
+#可能存在问题
 class ChunkEncoder(nn.Module):
     def __init__(self, chunk_size=8, feature_ch=g_ch_d, context_ch=g_ch_d, y_ch=g_ch_y, block_num=6, heads=8):
         super().__init__()        
@@ -230,16 +230,76 @@ class FrameSpecificDecoder(nn.Module):
         return bias_pixel_shuffle_8(out, self.head.bias)
 
 
+class ParallelDepthConvBlock(nn.Module):
+    def __init__(self, in_ch, out_ch, chunk_size, shortcut=False, force_adaptor=False):
+        super().__init__()
+        self.chunk_size = chunk_size
+        self.out_ch = out_ch
+        self.shortcut = shortcut
+
+        self.adaptor = None
+        if in_ch != out_ch or force_adaptor:
+            self.adaptor = nn.Conv2d(in_ch * chunk_size, out_ch * chunk_size, 1, groups=chunk_size)
+
+        self.dc_0 = nn.Conv2d(out_ch * chunk_size, out_ch * chunk_size, 1, groups=chunk_size)
+        self.dc_1 = nn.Conv2d(
+            out_ch * chunk_size,
+            out_ch * chunk_size,
+            3,
+            padding=1,
+            groups=out_ch * chunk_size,
+        )
+        self.dc_2 = nn.Conv2d(out_ch * chunk_size, out_ch * chunk_size, 1, groups=chunk_size)
+        self.ffn_0 = nn.Conv2d(out_ch * chunk_size, out_ch * 4 * chunk_size, 1, groups=chunk_size)
+        self.ffn_1 = nn.Conv2d(out_ch * 2 * chunk_size, out_ch * chunk_size, 1, groups=chunk_size)
+
+    @staticmethod
+    def wsilu(x):
+        return torch.sigmoid(4.0 * x) * x
+
+    def wsilu_chunk_add(self, x):
+        b, _, h, w = x.shape
+        x = self.wsilu(x)
+        x = x.reshape(b, self.chunk_size, self.out_ch * 4, h, w)
+        x1, x2 = x.chunk(2, dim=2)
+        return (x1 + x2).reshape(b, self.chunk_size * self.out_ch * 2, h, w)
+
+    def forward(self, x):
+        if self.adaptor is not None:
+            x = self.adaptor(x)
+        out = self.dc_2(self.dc_1(self.wsilu(self.dc_0(x)))) + x
+        out = self.ffn_1(self.wsilu_chunk_add(self.ffn_0(out))) + out
+        if self.shortcut:
+            out = out + x
+        return out
+
+
 class FrameSpecificDecoders(nn.Module):
     def __init__(self, chunk_size=8):
         super().__init__()
-        self.decoders = nn.ModuleList([
-            FrameSpecificDecoder() for _ in range(chunk_size)
-        ])
+        self.chunk_size = chunk_size
+        self.conv = nn.Sequential(
+            ParallelDepthConvBlock(g_ch_d, g_ch_recon, chunk_size),
+            ParallelDepthConvBlock(g_ch_recon, g_ch_recon, chunk_size),
+            ParallelDepthConvBlock(g_ch_recon, g_ch_recon, chunk_size),
+        )
+        self.head = nn.Conv2d(
+            g_ch_recon * chunk_size,
+            g_ch_src_d * chunk_size,
+            1,
+            groups=chunk_size,
+        )
 
     def forward(self, feature):
-        frames = [decoder(feature) for decoder in self.decoders]
-        return torch.stack(frames, dim=1)
+        b, c, h, w = feature.shape
+        out = feature.unsqueeze(1).expand(-1, self.chunk_size, -1, -1, -1)
+        out = out.reshape(b, self.chunk_size * c, h, w)
+        out = self.conv(out)
+        out = self.head(out)
+        out = out.reshape(b * self.chunk_size, g_ch_src_d, h, w)
+        out = F.pixel_shuffle(out, 8)
+        out = torch.clamp(out, 0., 1.)
+        return out.reshape(b, self.chunk_size, 3, h * 8, w * 8)
 
 
 class HyperEncoder(nn.Module):
@@ -356,6 +416,11 @@ class StreamlinedEntropyModel(nn.Module):
         params = self.mean_prior_adaptors[step - 1](params)
         return self.mean_prior(params)
 
+    @staticmethod
+    def quantize_ste(x):
+        x_quant = torch.round(x).clamp(-128.0, 127.0)
+        return x + (x_quant - x).detach()
+
     def quantize(self, y, common_params, masks, force_zero_thres=None,
                  scale_min=None, scale_max=None):
         _, scales, mean0 = self.separate_prior(common_params)
@@ -371,7 +436,7 @@ class StreamlinedEntropyModel(nn.Module):
 
         for step, mask in enumerate(masks):
             mean = self.mean_for_step(step, common_params, mean0, y_hat_so_far)
-            curr_y_q = torch.round((y - mean) * mask).clamp_(-128.0, 127.0)
+            curr_y_q = self.quantize_ste((y - mean) * mask)
             if active_mask is not None:
                 curr_y_q = curr_y_q * active_mask
             curr_y_hat = (curr_y_q + mean) * mask

@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+import math
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -142,13 +144,23 @@ class IntraSpecificFrame(nn.Module):
 class IntraSpecificFrames(nn.Module):
     def __init__(self, chunk_size=8):
         super().__init__()
-        self.decoders = nn.ModuleList([
-            IntraSpecificFrame() for _ in range(chunk_size)
-        ])
+        self.chunk_size = chunk_size
+        self.head = nn.Conv2d(
+            g_ch_src * chunk_size,
+            g_ch_src * chunk_size,
+            1,
+            groups=chunk_size,
+        )
 
     def forward(self, feature):
-        frames = [decoder(feature) for decoder in self.decoders]
-        return torch.stack(frames, dim=1)
+        b, c, h, w = feature.shape
+        out = feature.unsqueeze(1).expand(-1, self.chunk_size, -1, -1, -1)
+        out = out.reshape(b, self.chunk_size * c, h, w)
+        out = self.head(out)
+        out = out.reshape(b * self.chunk_size, g_ch_src, h, w)
+        out = F.pixel_shuffle(out, 8)
+        out = torch.clamp(out, 0., 1.)
+        return out.reshape(b, self.chunk_size, 3, h * 8, w * 8)
 
 
 
@@ -185,6 +197,11 @@ class IntraStreamlinedEntropy(nn.Module):
         params = self.mean_prior_adaptors[step - 1](params)
         return self.mean_prior(params)
 
+    @staticmethod
+    def quantize_ste(x):
+        x_quant = torch.round(x).clamp(-128.0, 127.0)
+        return x + (x_quant - x).detach()
+
     def quantize(self, y, common_params, masks, force_zero_thres=None,
                  scale_min=None, scale_max=None):
         _, scales, mean0 = self.separate_prior(common_params)
@@ -200,7 +217,7 @@ class IntraStreamlinedEntropy(nn.Module):
 
         for step, mask in enumerate(masks):
             mean = self.mean_for_step(step, common_params, mean0, y_hat_so_far)
-            curr_y_q = torch.round((y - mean) * mask).clamp_(-128.0, 127.0)
+            curr_y_q = self.quantize_ste((y - mean) * mask)
             if active_mask is not None:
                 curr_y_q = curr_y_q * active_mask
             curr_y_hat = (curr_y_q + mean) * mask
@@ -257,6 +274,73 @@ class DCVCUFIntra(CompressionModel):
 
         self.q_scale_enc = nn.Parameter(torch.ones((self.get_qp_num(), g_ch_enc_dec, 1, 1)))
         self.q_scale_dec = nn.Parameter(torch.ones((self.get_qp_num(), g_ch_enc_dec, 1, 1)))
+
+    @staticmethod
+    def _quantize_ste(x):
+        return x + (torch.round(x) - x).detach()
+
+    @staticmethod
+    def _probs_to_bits(probs):
+        return -torch.log2(torch.clamp(probs, min=1e-9))
+
+    def _get_index_tensor(self, qp, device):
+        if isinstance(qp, torch.Tensor):
+            qp = int(qp.item())
+        return torch.tensor([qp], dtype=torch.int32, device=device)
+
+    def _get_y_bits(self, y_q, scales):
+        scales = torch.clamp(scales, min=0.11, max=16.0)
+        gaussian = torch.distributions.normal.Normal(torch.zeros_like(scales), scales)
+        probs = gaussian.cdf(y_q + 0.5) - gaussian.cdf(y_q - 0.5)
+        return self._probs_to_bits(probs)
+
+    def _get_z_bits(self, z_hat, qp):
+        index = self._get_index_tensor(qp, z_hat.device)
+        probs = self.bit_estimator_z.get_cdf(z_hat + 0.5, index) - \
+            self.bit_estimator_z.get_cdf(z_hat - 0.5, index)
+        return self._probs_to_bits(probs)
+
+    def _chunk_mse(self, x, x_hat):
+        b, t, _, h, w = x.shape
+        mse = F.mse_loss(x_hat, x, reduction="none")
+        return torch.sum(mse, dim=(1, 2, 3, 4)) / (t * h * w)
+
+    def forward(self, x, qp):
+        if isinstance(qp, torch.Tensor):
+            qp = int(qp.item())
+
+        curr_q_enc = self.q_scale_enc[qp:qp + 1, :, :, :]
+        curr_q_dec = self.q_scale_dec[qp:qp + 1, :, :, :]
+
+        y = self.enc(x, curr_q_enc)
+        y_pad = self.pad_for_y(y)
+        z = self.hyper_enc(y_pad)
+        z_hat = self._quantize_ste(z)
+
+        params = self.hyper_dec(z_hat)
+        params = self.y_prior_fusion(params)
+        _, _, y_h, y_w = y.shape
+        params = params[:, :, :y_h, :y_w].contiguous()
+
+        y_q, y_scales, y_hat = self.compress_prior_uf_quadtree_sem(y, params)
+        feature = self.dec(y_hat, curr_q_dec)
+        x_hat = self.recon_generation_net(feature)
+        ref_feature = self.ref_feature_proj(feature)
+
+        b, t, _, h, w = x.shape
+        pixel_num = t * h * w
+        bpp_y = torch.sum(self._get_y_bits(y_q, y_scales), dim=(1, 2, 3)) / pixel_num
+        bpp_z = torch.sum(self._get_z_bits(z_hat, qp), dim=(1, 2, 3)) / pixel_num
+        ssim = torch.zeros(b, device=x.device, dtype=x.dtype)
+
+        return {
+            "bpp": bpp_y + bpp_z,
+            "x_hat": x_hat,
+            "ref_chunk": x_hat,
+            "ref_feature": ref_feature,
+            "mse": self._chunk_mse(x, x_hat),
+            "ssim": ssim,
+        }
 
     def compress(self, x, qp):
         device = x.device

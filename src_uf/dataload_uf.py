@@ -11,8 +11,6 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-#DEFAULT_TRAIN_ROOT = "/home/admin1/Data/data/"
-#DEFAULT_TRAIN_FILELIST = "/home/admin1/Data/data/output_paths_no_transitions.txt"
 
 #将(C,T,H,W)转化为(C*T,H,W),然后进行随机裁剪和填充,最后再转化为(C,T,H,W)
 def random_crop_and_pad_chunk_sequence(chunks, size):
@@ -45,6 +43,8 @@ def random_flip_chunk_sequence(chunks):
 
 #读取txt文件，该文件里记录着所有需要训练的图像路径
 def _read_filelist(filelist):
+    if filelist is None:
+        raise ValueError("filelist must be provided.")
     with open(filelist) as f:
         return [line.strip() for line in f if line.strip() and not line.lstrip().startswith("#")]
 
@@ -123,7 +123,7 @@ class UFDataSet(data.Dataset):
     def __init__(
         self,
         path=None,
-        rootdir=DEFAULT_TRAIN_ROOT,
+        rootdir=None,
         filefolderlist=None,
         im_height=256,
         im_width=256,
@@ -136,7 +136,9 @@ class UFDataSet(data.Dataset):
     ):
         self.path = path
         self.rootdir = rootdir
-        self.filefolderlist = filefolderlist or path or DEFAULT_TRAIN_FILELIST
+        self.filefolderlist = filefolderlist or path
+        if self.filefolderlist is None:
+            raise ValueError("UFDataSet requires filefolderlist or path. Pass it from the training script.")
         self.im_height = im_height
         self.im_width = im_width
         self.chunk_size = chunk_size
