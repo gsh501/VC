@@ -61,3 +61,8 @@ def yuv_444_to_420(yuv):
     uv = yuv[:, 1:, :, :]
 
     return y, _downsample(uv)
+
+
+def yuv_420_to_444(y, uv_420):
+    uv_444 = F.interpolate(uv_420, size=y.shape[-2:], mode="nearest")
+    return torch.cat([y, uv_444], dim=1)
