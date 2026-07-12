@@ -95,14 +95,14 @@ class CompressionModel(nn.Module):
     def separate_prior_for_encoding(common_params, y):
         q_dec, scales, mean0 = common_params.chunk(3, 1)
         q_dec, y = clamp_reciprocal_with_quant(q_dec, y, 0.5)
-        #scales = torch.clamp_min(scales, self.scale_floor)
+        scales = torch.clamp_min(scales, self.scale_floor)
         return y, q_dec, scales, mean0
 
     @staticmethod
     def separate_prior_for_decoding(common_params):
         quant_step, scales, mean0 = common_params.chunk(3, 1)
         quant_step = torch.clamp_min(quant_step, 0.5)
-        #scales = torch.clamp_min(scales, self.scale_floor)
+        scales = torch.clamp_min(scales, self.scale_floor)
         return quant_step, scales, mean0
 
     def process_with_mask(self, y, scales, means, mask):

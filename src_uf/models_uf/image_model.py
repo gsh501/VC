@@ -324,5 +324,3 @@ class DCVCUFIntra(CompressionModel):
 
         return {"x_hat": x_hat, "ref_chunk": x_hat, "ref_feature": ref_feature}
 
-
-DMCI = DCVCUFIntra

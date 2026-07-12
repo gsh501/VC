@@ -594,6 +594,3 @@ class DCVCUF(CompressionModel):
 
 def get_uf_model_config(name=DEFAULT_MODEL_SCALE):
     return UF_MODEL_CONFIGS[name]
-
-
-DMC = DCVCUF
