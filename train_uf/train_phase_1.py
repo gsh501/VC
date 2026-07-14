@@ -90,7 +90,7 @@ class RateDistortionLoss(nn.Module):
             "mse_loss": result["mse"],
         }
         if 0 <= epoch < self.warmup_epochs:
-            out["loss"] = out["mse_loss"] * 100000
+            out["loss"] = out["mse_loss"] * 5000 + 0.01 * out["bpp_loss"]
         else:
             out["loss"] = lamada * out["mse_loss"] + out["bpp_loss"]
         return out
@@ -160,6 +160,10 @@ def psnr(x, x_hat, max_val=1.0):
     return psnr
 
 
+def psnr_from_mse(mse):
+    return -10 * math.log10(max(float(mse), 1e-12))
+
+
 def qp_to_lambda(qp, q_num=64, lam_min=1, lam_max=768):
     scale = qp / (q_num - 1)
     ln_lam_min = math.log(lam_min)
@@ -194,6 +198,19 @@ def reduce_average_meter(meter, device):
     return total / max(count, 1.0)
 
 
+def checkpoint_loss_value(checkpoint, default=float("inf")):
+    if not isinstance(checkpoint, dict):
+        return default
+
+    value = checkpoint.get("best_loss", checkpoint.get("loss", default))
+    if torch.is_tensor(value):
+        value = value.detach().cpu().item()
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def load_checkpoint(model, optimizer, checkpoint_path, device):
     checkpoint = torch.load(checkpoint_path, map_location=device)
     state_dict = checkpoint["state_dict"] if "state_dict" in checkpoint else checkpoint
@@ -208,7 +225,16 @@ def load_checkpoint(model, optimizer, checkpoint_path, device):
     if optimizer is not None and "optimizer" in checkpoint:
         optimizer.load_state_dict(checkpoint["optimizer"])
 
-    return checkpoint.get("epoch", -1) + 1
+    best_loss = checkpoint_loss_value(checkpoint)
+    best_checkpoint_path = os.path.join(
+        os.path.dirname(checkpoint_path),
+        "checkpoint_best_loss_uf_phase_1.pth.tar",
+    )
+    if os.path.exists(best_checkpoint_path):
+        best_checkpoint = torch.load(best_checkpoint_path, map_location="cpu")
+        best_loss = min(best_loss, checkpoint_loss_value(best_checkpoint, best_loss))
+
+    return checkpoint.get("epoch", -1) + 1, best_loss
 
 
 def train_one_epoch(epoch, model, criterion, train_dataloader, optimizer, device, args):
@@ -216,7 +242,6 @@ def train_one_epoch(epoch, model, criterion, train_dataloader, optimizer, device
     loss_meter = AverageMeter()
     bpp_meter = AverageMeter()
     mse_meter = AverageMeter()
-    psnr_meter = AverageMeter()
 
     for i, batch in enumerate(train_dataloader):
         ref_chunk = batch[0].to(device, non_blocking=True)
@@ -241,7 +266,6 @@ def train_one_epoch(epoch, model, criterion, train_dataloader, optimizer, device
         loss_meter.update(loss, batch_size)
         bpp_meter.update(out_criterion["bpp_loss"], batch_size)
         mse_meter.update(out_criterion["mse_loss"], batch_size)
-        psnr_meter.update(psnr(ref_chunk, out_net["x_hat"]), batch_size)
 
         if is_main_process() and i % args.log_interval == 0:
             logging.info(
@@ -249,16 +273,16 @@ def train_one_epoch(epoch, model, criterion, train_dataloader, optimizer, device
                 i,
                 len(train_dataloader),
                 loss_meter.avg,
-                psnr_meter.avg,
+                psnr_from_mse(mse_meter.avg),
                 mse_meter.avg,
                 bpp_meter.avg,
                 qp,
             )
 
     avg_loss = reduce_average_meter(loss_meter, device)
-    avg_psnr = reduce_average_meter(psnr_meter, device)
     avg_mse = reduce_average_meter(mse_meter, device)
     avg_bpp = reduce_average_meter(bpp_meter, device)
+    avg_psnr = psnr_from_mse(avg_mse)
 
     if is_main_process():
         logging.info(
@@ -277,7 +301,6 @@ def test_epoch(epoch, model, criterion, test_dataloader, device, args):
     loss_meter = AverageMeter()
     bpp_meter = AverageMeter()
     mse_meter = AverageMeter()
-    psnr_meter = AverageMeter()
 
     lamada = qp_to_lambda(args.test_qp, q_num=args.q_num)
 
@@ -293,12 +316,11 @@ def test_epoch(epoch, model, criterion, test_dataloader, device, args):
             loss_meter.update(loss, batch_size)
             bpp_meter.update(out_criterion["bpp_loss"], batch_size)
             mse_meter.update(out_criterion["mse_loss"], batch_size)
-            psnr_meter.update(psnr(ref_chunk, out_net["x_hat"]), batch_size)
 
     avg_loss = reduce_average_meter(loss_meter, device)
-    avg_psnr = reduce_average_meter(psnr_meter, device)
     avg_mse = reduce_average_meter(mse_meter, device)
     avg_bpp = reduce_average_meter(bpp_meter, device)
+    avg_psnr = psnr_from_mse(avg_mse)
 
     if is_main_process():
         logging.info(
@@ -381,7 +403,7 @@ def parse_args(argv):
     parser.add_argument("-e", "--epochs", default=120, type=int)
     parser.add_argument("-lr", "--learning-rate", default=1e-4, type=float)
     parser.add_argument("-n", "--num-workers", type=int, default=4)
-    parser.add_argument("-q", "--quality-level", type=int, default=1)
+    parser.add_argument("-q", "--quality-level", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--test-batch-size", type=int, default=1)
     parser.add_argument("--patch-size", type=int, nargs=2, default=(256, 256))
@@ -394,6 +416,7 @@ def parse_args(argv):
     parser.add_argument("--qp-warmup-epochs", type=int, default=48)     #qp的热身
     parser.add_argument("--cuda", type=str2bool, default=True)
     parser.add_argument("--save", type=str2bool, default=True)
+    parser.add_argument("--save-interval", type=int, default=10)
     parser.add_argument("--seed", type=int, default=7)       #设置随机数种子
     parser.add_argument("--clip_max_norm", default=1.0, type=float)
     parser.add_argument("--local-rank", "--local_rank", dest="local_rank", default=-1, type=int)
@@ -413,6 +436,8 @@ def parse_args(argv):
         raise ValueError("UF phase 1 validation also uses test_gop=8.")
     if not (0 <= args.test_qp < args.q_num <= 64):
         raise ValueError("test_qp must be in [0, q_num), and q_num must be <= 64 for DCVCUFIntra.")
+    if args.save_interval < 1:
+        raise ValueError("save_interval must be >= 1.")
     return args
 
 
@@ -449,14 +474,16 @@ def main(argv):
     criterion = RateDistortionLoss(warmup_epochs=args.warmup_epochs)
 
     last_epoch = 0
+    best_loss = float("inf")
     if args.checkpoint:
         if is_main_process():
             logging.info("Loading checkpoint from %s", args.checkpoint)
-        last_epoch = load_checkpoint(model, optimizer, args.checkpoint, device)
+        last_epoch, best_loss = load_checkpoint(model, optimizer, args.checkpoint, device)
+        if is_main_process():
+            logging.info("Resume from epoch %d with best loss %.6f", last_epoch, best_loss)
 
     factors = [0.4, 0.1, 0.04, 0.01]
-    best_loss = float("inf")
-    global_step = 0
+    global_step = last_epoch * len(train_dataloader)
 
     for epoch in range(last_epoch, args.epochs):
         if train_sampler is not None:
@@ -484,16 +511,42 @@ def main(argv):
         best_loss = min(loss, best_loss)
 
         if args.save and is_main_process():
+            checkpoint_state = {
+                "epoch": epoch,
+                "state_dict": model.state_dict(),
+                "loss": loss,
+                "best_loss": best_loss,
+                "optimizer": optimizer.state_dict(),
+                "args": vars(args),
+            }
             save_checkpoint(
-                {
-                    "epoch": epoch,
-                    "state_dict": model.state_dict(),
-                    "loss": loss,
-                    "optimizer": optimizer.state_dict(),
-                    "args": vars(args),
-                },
+                checkpoint_state,
                 is_best,
                 base_dir,
+            )
+            logging.info(
+                "Checkpoint epoch %d: best model saved: %s | current loss: %.6f | best loss: %.6f",
+                epoch,
+                "yes" if is_best else "no",
+                loss,
+                best_loss,
+            )
+
+            if (epoch + 1) % args.save_interval == 0:
+                periodic_filename = "checkpoint_epoch_%04d_uf_phase_1.pth.tar" % (epoch + 1)
+                save_checkpoint(
+                    checkpoint_state,
+                    False,
+                    base_dir,
+                    filename=periodic_filename,
+                )
+                logging.info("Saved periodic checkpoint: %s", os.path.join(base_dir, periodic_filename))
+        elif is_main_process():
+            logging.info(
+                "Checkpoint epoch %d: save disabled | best model saved: no | current loss: %.6f | best loss: %.6f",
+                epoch,
+                loss,
+                best_loss,
             )
 
         global_step += len(train_dataloader)

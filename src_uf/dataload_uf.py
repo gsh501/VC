@@ -260,8 +260,7 @@ class UFTestDataSet(data.Dataset):
     """
     UF test loader for GOP evaluation.
 
-    It groups filelist entries exactly like the RT TetsDataSet, then splits each
-    GOP into fixed-size chunks:
+    It groups filelist entries by sequence, then splits each GOP into fixed-size chunks:
         ref_chunk: [chunk_size, 3, H, W]
         input_chunks: [num_chunks - 1, chunk_size, 3, H, W]
         image_names: list[str]
@@ -276,39 +275,48 @@ class UFTestDataSet(data.Dataset):
         self.pad_last = pad_last
         self.image_names = []
 
-        imlist = _read_filelist(filelist)
-        imlist = sorted(imlist, key=_numeric_sort_key)
-
-        cnt = len(imlist)
-
-        if testfull:
-            gop_count = cnt // self.gop
-            if cnt % self.gop > 0:
-                gop_count += 1
-        else:
-            gop_count = 1
-
         self.gops = []
+        items = [
+            (name, _resolve_path(root, name))
+            for name in _read_filelist(filelist)
+        ]
+        items = sorted(items, key=lambda item: UFDataSet._sequence_sort_key(item[1]))
 
-        for i in range(gop_count):
-            start = i * self.gop
-            end = min(start + self.gop, cnt)
-            names = imlist[start:end]
-            if not names:
-                continue
+        sequences = []
+        current_key = None
+        current_items = []
+        for item in items:
+            key = UFDataSet._sequence_key(item[1])
+            if current_key is not None and key != current_key:
+                sequences.append(current_items)
+                current_items = []
+            current_key = key
+            current_items.append(item)
+        if current_items:
+            sequences.append(current_items)
 
-            paths = [_resolve_path(root, name) for name in names]
-            if self.pad_last:
-                target_len = ((len(paths) + chunk_size - 1) // chunk_size) * chunk_size
-                while len(paths) < target_len:
-                    paths.append(paths[-1])
-                    names.append(names[-1])
+        for sequence in sequences:
+            for start in range(0, len(sequence), self.gop):
+                gop_items = sequence[start:start + self.gop]
+                if not gop_items:
+                    continue
 
-            if len(paths) < chunk_size:
-                continue
+                names = [name for name, _ in gop_items]
+                paths = [path for _, path in gop_items]
+                if self.pad_last:
+                    target_len = ((len(paths) + chunk_size - 1) // chunk_size) * chunk_size
+                    while len(paths) < target_len:
+                        paths.append(paths[-1])
+                        names.append(names[-1])
 
-            self.gops.append(paths)   #gop中图像的路径
-            self.image_names.append(names)      #gop图像的命名
+                if len(paths) < chunk_size:
+                    continue
+
+                self.gops.append(paths)   #gop中图像的路径
+                self.image_names.append(names)      #gop图像的命名
+
+                if not testfull:
+                    return
 
     def __len__(self):
         return len(self.gops)

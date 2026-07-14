@@ -1,0 +1,45 @@
+2026-07-13 11:21:01,689 [INFO ]  Logging file is ./pretrained_uf/DCVCUFIntra/1/20260713_112101.log
+2026-07-13 11:21:01,689 [INFO ]  ======================= 2026-07-13_11_21_01 =======================
+2026-07-13 11:21:01,689 [INFO ]  model: DCVCUFIntra
+2026-07-13 11:21:01,689 [INFO ]  train_root: None
+2026-07-13 11:21:01,689 [INFO ]  train_filelist: /home/admin1/Data/data/vimeo_septuplet/train_filelist.txt
+2026-07-13 11:21:01,689 [INFO ]  test_dataset: None
+2026-07-13 11:21:01,689 [INFO ]  test_filelist: None
+2026-07-13 11:21:01,689 [INFO ]  epochs: 1
+2026-07-13 11:21:01,689 [INFO ]  learning_rate: 0.0001
+2026-07-13 11:21:01,689 [INFO ]  num_workers: 0
+2026-07-13 11:21:01,689 [INFO ]  quality_level: 1
+2026-07-13 11:21:01,689 [INFO ]  batch_size: 1
+2026-07-13 11:21:01,689 [INFO ]  test_batch_size: 1
+2026-07-13 11:21:01,690 [INFO ]  patch_size: [64, 64]
+2026-07-13 11:21:01,690 [INFO ]  chunk_size: 8
+2026-07-13 11:21:01,690 [INFO ]  gop: 8
+2026-07-13 11:21:01,690 [INFO ]  test_gop: 8
+2026-07-13 11:21:01,690 [INFO ]  q_num: 64
+2026-07-13 11:21:01,690 [INFO ]  test_qp: 63
+2026-07-13 11:21:01,690 [INFO ]  warmup_epochs: 20
+2026-07-13 11:21:01,690 [INFO ]  qp_warmup_epochs: 48
+2026-07-13 11:21:01,690 [INFO ]  cuda: True
+2026-07-13 11:21:01,690 [INFO ]  save: False
+2026-07-13 11:21:01,690 [INFO ]  seed: 7
+2026-07-13 11:21:01,690 [INFO ]  clip_max_norm: 1.0
+2026-07-13 11:21:01,690 [INFO ]  local_rank: -1
+2026-07-13 11:21:01,690 [INFO ]  checkpoint: None
+2026-07-13 11:21:01,690 [INFO ]  output_dir: ./pretrained_uf
+2026-07-13 11:21:01,690 [INFO ]  name: 2026-07-13_11_21_01
+2026-07-13 11:21:01,690 [INFO ]  log_interval: 1
+2026-07-13 11:21:01,690 [INFO ]  check_exists: False
+2026-07-13 11:21:01,690 [INFO ]  max_samples: 4
+2026-07-13 11:21:01,690 [INFO ]  pad_last: True
+2026-07-13 11:21:01,690 [INFO ]  drop_last: False
+2026-07-13 11:21:01,690 [INFO ]  distributed: False
+2026-07-13 11:21:01,690 [INFO ]  ========================================
+2026-07-13 11:21:06,343 [INFO ]  ====== Current epoch 0 ======
+2026-07-13 11:21:06,343 [INFO ]  Learning rate: 0.0001
+2026-07-13 11:21:08,306 [INFO ]  [0/4] | Loss: 45740.070 | PSNR: 9.746 | MSE: 0.45740071 | BPP: 0.2587 | QP: 63
+2026-07-13 11:21:08,679 [INFO ]  [1/4] | Loss: 55465.193 | PSNR: 7.779 | MSE: 0.55465193 | BPP: 0.2600 | QP: 63
+2026-07-13 11:21:08,742 [INFO ]  [2/4] | Loss: 49514.116 | PSNR: 9.239 | MSE: 0.49514116 | BPP: 0.2592 | QP: 63
+2026-07-13 11:21:08,791 [INFO ]  [3/4] | Loss: 63780.153 | PSNR: 7.718 | MSE: 0.63780154 | BPP: 0.2606 | QP: 63
+2026-07-13 11:21:08,791 [INFO ]  Train epoch 0: Loss: 63780.153 | PSNR: 7.718 | MSE: 0.63780154 | BPP: 0.2606
+2026-07-13 11:21:08,791 [INFO ]  No test_filelist is set; using train loss for checkpoint selection.
+2026-07-13 11:21:08,791 [INFO ]  Global step updated to: 4

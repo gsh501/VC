@@ -301,9 +301,8 @@ class DCVCUFIntra(CompressionModel):
         return self._probs_to_bits(probs)
 
     def _chunk_mse(self, x, x_hat):
-        b, t, _, h, w = x.shape
         mse = F.mse_loss(x_hat, x, reduction="none")
-        return torch.sum(mse, dim=(1, 2, 3, 4)) / (t * h * w)
+        return mse.flatten(1).mean(dim=1)
 
     def forward(self, x, qp):
         if isinstance(qp, torch.Tensor):
@@ -343,7 +342,16 @@ class DCVCUFIntra(CompressionModel):
         }
 
     def compress(self, x, qp):
+        if isinstance(qp, torch.Tensor):
+            qp = int(qp.item())
         device = x.device
+        if device.type != "cuda":
+            raise RuntimeError(
+                "DCVCUFIntra.compress requires CUDA tensors because entropy coding uses CUDA streams."
+            )
+        if self.entropy_coder is None:
+            self.update()
+
         curr_q_enc = self.q_scale_enc[qp:qp+1, :, :, :]
         curr_q_dec = self.q_scale_dec[qp:qp+1, :, :, :]
 
@@ -387,6 +395,15 @@ class DCVCUFIntra(CompressionModel):
     def decompress(self, bit_stream, sps, qp):
         dtype = next(self.parameters()).dtype
         device = next(self.parameters()).device
+        if isinstance(qp, torch.Tensor):
+            qp = int(qp.item())
+        if device.type != "cuda":
+            raise RuntimeError(
+                "DCVCUFIntra.decompress requires a CUDA model because entropy decoding uses CUDA streams."
+            )
+        if self.entropy_coder is None:
+            self.update()
+
         curr_q_dec = self.q_scale_dec[qp:qp+1, :, :, :]
 
         self.entropy_coder.set_use_two_entropy_coders(sps['ec_part'] == 1)
@@ -407,4 +424,3 @@ class DCVCUFIntra(CompressionModel):
         ref_feature = self.ref_feature_proj(feature)
 
         return {"x_hat": x_hat, "ref_chunk": x_hat, "ref_feature": ref_feature}
-
