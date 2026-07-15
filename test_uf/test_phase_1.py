@@ -123,6 +123,16 @@ def torch_load(path, map_location="cpu"):
         return torch.load(path, map_location=map_location)
 
 
+def is_unreadable_checkpoint_error(exc):
+    message = str(exc).lower()
+    return (
+        isinstance(exc, (EOFError, FileNotFoundError, OSError))
+        or "pytorchstreamreader failed reading zip archive" in message
+        or "failed finding central directory" in message
+        or "not a zip file" in message
+    )
+
+
 def default_log_path():
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     return Path(__file__).resolve().parent / f"test_phase_1_{timestamp}.log"
@@ -659,6 +669,7 @@ def main(argv):
         )
 
         all_results = []
+        failed_checkpoints = []
 
         for checkpoint_idx, checkpoint_path in enumerate(checkpoints, 1):
             label = checkpoint_label(checkpoint_path, args.checkpoint_dir)
@@ -669,7 +680,20 @@ def main(argv):
             print(f"Checkpoint output dir: {checkpoint_output_dir}")
 
             model = DCVCUFIntra()
-            checkpoint = load_checkpoint(model, checkpoint_path)
+            try:
+                checkpoint = load_checkpoint(model, checkpoint_path)
+            except Exception as exc:
+                if args.checkpoint is not None or not is_unreadable_checkpoint_error(exc):
+                    raise
+                print(f"Skipping unreadable checkpoint {label}: {exc}")
+                failed_checkpoints.append(
+                    {
+                        "checkpoint": label,
+                        "path": str(checkpoint_path),
+                        "error": str(exc),
+                    }
+                )
+                continue
             model = model.to(args.device)
             model.eval()
 
@@ -710,6 +734,10 @@ def main(argv):
                 "{psnr:.3f} | {psnr_yuv420:.3f} | {mse:.8f} | {bpp:.4f} | "
                 "{bin_bytes:.2f} | {enc_ms:.2f} | {dec_ms:.2f} | {time:.2f}".format(**result)
             )
+        if failed_checkpoints:
+            print("\nSkipped Checkpoints")
+            for item in failed_checkpoints:
+                print(f"{item['checkpoint']} | {item['error']}")
         print(f"\nSaved outputs to: {output_dir}")
         print(f"\nSaved log to: {log_path}")
     finally:

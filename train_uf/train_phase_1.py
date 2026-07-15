@@ -5,6 +5,7 @@ import os
 import random
 import shutil
 import sys
+import tempfile
 import time
 from datetime import datetime
 
@@ -336,9 +337,31 @@ def test_epoch(epoch, model, criterion, test_dataloader, device, args):
 
 def save_checkpoint(state, is_best, base_dir, filename="checkpoint_uf_phase_1.pth.tar"):
     path = os.path.join(base_dir, filename)
-    torch.save(state, path)
+
+    fd, tmp_path = tempfile.mkstemp(dir=base_dir, prefix=filename + ".tmp.")
+    os.close(fd)
+    try:
+        torch.save(state, tmp_path)
+        os.replace(tmp_path, path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
+
     if is_best:
-        shutil.copyfile(path, os.path.join(base_dir, "checkpoint_best_loss_uf_phase_1.pth.tar"))
+        best_path = os.path.join(base_dir, "checkpoint_best_loss_uf_phase_1.pth.tar")
+        fd, tmp_best_path = tempfile.mkstemp(
+            dir=base_dir,
+            prefix="checkpoint_best_loss_uf_phase_1.pth.tar.tmp.",
+        )
+        os.close(fd)
+        try:
+            shutil.copyfile(path, tmp_best_path)
+            os.replace(tmp_best_path, best_path)
+        except Exception:
+            if os.path.exists(tmp_best_path):
+                os.remove(tmp_best_path)
+            raise
 
 
 def build_train_loader(args):
