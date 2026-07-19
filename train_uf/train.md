@@ -7,6 +7,10 @@ git commit -m "×××××"
 git push origin
 
 下载：
+git status -sb
+git pull --ff-only origin gsh
+git log --oneline -5
+git status -sb
 
 #2.配置环境，在dcvc-rt环境基础上加入imageio
 pip install imageio
