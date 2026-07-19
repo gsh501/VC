@@ -1,0 +1,80 @@
+2026-07-19 17:42:48,782 [INFO ]  Logging file is ./pretrained_uf\DCVCUFIntra\1\20260719_174248.log
+2026-07-19 17:42:48,782 [INFO ]  ======================= 2026-07-19_17_42_48 =======================
+2026-07-19 17:42:48,782 [INFO ]  model: DCVCUFIntra
+2026-07-19 17:42:48,782 [INFO ]  train_root: D:\Drivers\Desktop\VC-gsh\Partvimeo_7\sequences
+2026-07-19 17:42:48,782 [INFO ]  train_filelist: D:\Drivers\Desktop\VC-gsh\Partvimeo_7\train_filelist.txt
+2026-07-19 17:42:48,782 [INFO ]  val_dataset: D:\Drivers\Desktop\VC-gsh\Partvimeo_7\sequences
+2026-07-19 17:42:48,782 [INFO ]  val_filelist: D:\Drivers\Desktop\VC-gsh\Partvimeo_7\val_filelist.txt
+2026-07-19 17:42:48,782 [INFO ]  epochs: 4
+2026-07-19 17:42:48,782 [INFO ]  learning_rate: 0.0001
+2026-07-19 17:42:48,782 [INFO ]  num_workers: 0
+2026-07-19 17:42:48,784 [INFO ]  quality_level: 1
+2026-07-19 17:42:48,784 [INFO ]  batch_size: 1
+2026-07-19 17:42:48,784 [INFO ]  val_batch_size: 1
+2026-07-19 17:42:48,784 [INFO ]  patch_size: (256, 256)
+2026-07-19 17:42:48,784 [INFO ]  chunk_size: 8
+2026-07-19 17:42:48,784 [INFO ]  gop: 8
+2026-07-19 17:42:48,784 [INFO ]  val_gop: 8
+2026-07-19 17:42:48,784 [INFO ]  q_num: 64
+2026-07-19 17:42:48,784 [INFO ]  test_qp: 63
+2026-07-19 17:42:48,784 [INFO ]  warmup_epochs: 20
+2026-07-19 17:42:48,784 [INFO ]  qp_warmup_epochs: 48
+2026-07-19 17:42:48,784 [INFO ]  cuda: True
+2026-07-19 17:42:48,784 [INFO ]  save: True
+2026-07-19 17:42:48,784 [INFO ]  seed: 7
+2026-07-19 17:42:48,784 [INFO ]  clip_max_norm: 1.0
+2026-07-19 17:42:48,784 [INFO ]  local_rank: -1
+2026-07-19 17:42:48,786 [INFO ]  checkpoint: None
+2026-07-19 17:42:48,786 [INFO ]  output_dir: ./pretrained_uf
+2026-07-19 17:42:48,786 [INFO ]  name: 2026-07-19_17_42_48
+2026-07-19 17:42:48,786 [INFO ]  log_interval: 1
+2026-07-19 17:42:48,786 [INFO ]  check_exists: False
+2026-07-19 17:42:48,786 [INFO ]  max_samples: 5
+2026-07-19 17:42:48,786 [INFO ]  pad_last: True
+2026-07-19 17:42:48,786 [INFO ]  drop_last: False
+2026-07-19 17:42:48,786 [INFO ]  distributed: False
+2026-07-19 17:42:48,786 [INFO ]  ========================================
+2026-07-19 17:42:49,078 [INFO ]  ====== Current epoch 0 ======
+2026-07-19 17:42:49,078 [INFO ]  Learning rate: 0.0001
+2026-07-19 17:42:49,738 [INFO ]  [0/5] | Loss: 993.866 | PSNR: 7.016 | MSE: 0.19877259 | BPP: 0.2943 | QP: 63
+2026-07-19 17:42:49,940 [INFO ]  [1/5] | Loss: 1094.127 | PSNR: 6.599 | MSE: 0.21882457 | BPP: 0.4179 | QP: 63
+2026-07-19 17:42:50,124 [INFO ]  [2/5] | Loss: 1084.345 | PSNR: 6.638 | MSE: 0.21686814 | BPP: 0.4599 | QP: 63
+2026-07-19 17:42:50,310 [INFO ]  [3/5] | Loss: 1046.816 | PSNR: 6.791 | MSE: 0.20936229 | BPP: 0.4561 | QP: 63
+2026-07-19 17:42:50,489 [INFO ]  [4/5] | Loss: 1012.322 | PSNR: 6.937 | MSE: 0.20246356 | BPP: 0.4308 | QP: 63
+2026-07-19 17:42:50,490 [INFO ]  Train epoch 0: Loss: 1012.322 | PSNR: 6.937 | MSE: 0.20246356 | BPP: 0.4308
+2026-07-19 17:43:10,476 [INFO ]  Val epoch 0: Loss: 754.728 | PSNR: 8.212 | MSE: 0.15094516 | BPP: 0.2156
+2026-07-19 17:43:10,970 [INFO ]  Checkpoint epoch 0: best model saved: yes | current loss: 754.727953 | best loss: 754.727953
+2026-07-19 17:43:10,970 [INFO ]  Global step updated to: 5
+2026-07-19 17:43:10,970 [INFO ]  ====== Current epoch 1 ======
+2026-07-19 17:43:10,970 [INFO ]  Learning rate: 0.0001
+2026-07-19 17:43:11,185 [INFO ]  [0/5] | Loss: 685.558 | PSNR: 8.629 | MSE: 0.13711110 | BPP: 0.2128 | QP: 63
+2026-07-19 17:43:11,325 [INFO ]  [1/5] | Loss: 775.336 | PSNR: 8.095 | MSE: 0.15506677 | BPP: 0.1786 | QP: 63
+2026-07-19 17:43:11,468 [INFO ]  [2/5] | Loss: 776.234 | PSNR: 8.090 | MSE: 0.15524637 | BPP: 0.1725 | QP: 63
+2026-07-19 17:43:11,605 [INFO ]  [3/5] | Loss: 774.129 | PSNR: 8.102 | MSE: 0.15482540 | BPP: 0.1730 | QP: 63
+2026-07-19 17:43:11,729 [INFO ]  [4/5] | Loss: 784.421 | PSNR: 8.044 | MSE: 0.15688377 | BPP: 0.1667 | QP: 63
+2026-07-19 17:43:11,729 [INFO ]  Train epoch 1: Loss: 784.421 | PSNR: 8.044 | MSE: 0.15688377 | BPP: 0.1667
+2026-07-19 17:43:23,369 [INFO ]  Val epoch 1: Loss: 692.276 | PSNR: 8.587 | MSE: 0.13845503 | BPP: 0.0963
+2026-07-19 17:43:23,888 [INFO ]  Checkpoint epoch 1: best model saved: yes | current loss: 692.276109 | best loss: 692.276109
+2026-07-19 17:43:23,889 [INFO ]  Global step updated to: 10
+2026-07-19 17:43:23,890 [INFO ]  ====== Current epoch 2 ======
+2026-07-19 17:43:23,890 [INFO ]  Learning rate: 0.0001
+2026-07-19 17:43:24,009 [INFO ]  [0/5] | Loss: 886.900 | PSNR: 7.511 | MSE: 0.17737971 | BPP: 0.0966 | QP: 63
+2026-07-19 17:43:24,157 [INFO ]  [1/5] | Loss: 837.086 | PSNR: 7.762 | MSE: 0.16741696 | BPP: 0.0958 | QP: 63
+2026-07-19 17:43:24,271 [INFO ]  [2/5] | Loss: 781.881 | PSNR: 8.058 | MSE: 0.15637602 | BPP: 0.0923 | QP: 63
+2026-07-19 17:43:24,382 [INFO ]  [3/5] | Loss: 733.801 | PSNR: 8.334 | MSE: 0.14676000 | BPP: 0.0887 | QP: 63
+2026-07-19 17:43:24,497 [INFO ]  [4/5] | Loss: 718.527 | PSNR: 8.425 | MSE: 0.14370523 | BPP: 0.0881 | QP: 63
+2026-07-19 17:43:24,497 [INFO ]  Train epoch 2: Loss: 718.527 | PSNR: 8.425 | MSE: 0.14370523 | BPP: 0.0881
+2026-07-19 17:43:36,184 [INFO ]  Val epoch 2: Loss: 626.462 | PSNR: 9.021 | MSE: 0.12529213 | BPP: 0.1007
+2026-07-19 17:43:36,689 [INFO ]  Checkpoint epoch 2: best model saved: yes | current loss: 626.461652 | best loss: 626.461652
+2026-07-19 17:43:36,689 [INFO ]  Global step updated to: 15
+2026-07-19 17:43:36,689 [INFO ]  ====== Current epoch 3 ======
+2026-07-19 17:43:36,689 [INFO ]  Learning rate: 0.0001
+2026-07-19 17:43:36,823 [INFO ]  [0/5] | Loss: 682.759 | PSNR: 8.647 | MSE: 0.13655162 | BPP: 0.0977 | QP: 63
+2026-07-19 17:43:36,960 [INFO ]  [1/5] | Loss: 600.225 | PSNR: 9.207 | MSE: 0.12004490 | BPP: 0.0873 | QP: 63
+2026-07-19 17:43:37,082 [INFO ]  [2/5] | Loss: 690.613 | PSNR: 8.597 | MSE: 0.13812251 | BPP: 0.0781 | QP: 63
+2026-07-19 17:43:37,196 [INFO ]  [3/5] | Loss: 666.715 | PSNR: 8.750 | MSE: 0.13334288 | BPP: 0.0738 | QP: 63
+2026-07-19 17:43:37,320 [INFO ]  [4/5] | Loss: 641.396 | PSNR: 8.918 | MSE: 0.12827896 | BPP: 0.0731 | QP: 63
+2026-07-19 17:43:37,320 [INFO ]  Train epoch 3: Loss: 641.396 | PSNR: 8.918 | MSE: 0.12827896 | BPP: 0.0731
+2026-07-19 17:43:48,696 [INFO ]  Val epoch 3: Loss: 577.747 | PSNR: 9.372 | MSE: 0.11554923 | BPP: 0.0785
+2026-07-19 17:43:49,216 [INFO ]  Checkpoint epoch 3: best model saved: yes | current loss: 577.746958 | best loss: 577.746958
+2026-07-19 17:43:49,217 [INFO ]  Global step updated to: 20

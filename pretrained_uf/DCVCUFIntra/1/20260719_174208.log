@@ -1,0 +1,36 @@
+2026-07-19 17:42:08,899 [INFO ]  Logging file is ./pretrained_uf\DCVCUFIntra\1\20260719_174208.log
+2026-07-19 17:42:08,900 [INFO ]  ======================= 2026-07-19_17_42_08 =======================
+2026-07-19 17:42:08,900 [INFO ]  model: DCVCUFIntra
+2026-07-19 17:42:08,900 [INFO ]  train_root: D:\Drivers\Desktop\VC-gsh\Partvimeo_32\sequences
+2026-07-19 17:42:08,900 [INFO ]  train_filelist: D:\Drivers\Desktop\VC-gsh\Partvimeo_32\train_filelist.txt
+2026-07-19 17:42:08,900 [INFO ]  val_dataset: D:\Drivers\Desktop\VC-gsh\Partvimeo_32\sequences
+2026-07-19 17:42:08,900 [INFO ]  val_filelist: D:\Drivers\Desktop\VC-gsh\Partvimeo_32\val_filelist.txt
+2026-07-19 17:42:08,900 [INFO ]  epochs: 4
+2026-07-19 17:42:08,900 [INFO ]  learning_rate: 0.0001
+2026-07-19 17:42:08,900 [INFO ]  num_workers: 0
+2026-07-19 17:42:08,900 [INFO ]  quality_level: 1
+2026-07-19 17:42:08,900 [INFO ]  batch_size: 1
+2026-07-19 17:42:08,900 [INFO ]  val_batch_size: 1
+2026-07-19 17:42:08,900 [INFO ]  patch_size: (256, 256)
+2026-07-19 17:42:08,900 [INFO ]  chunk_size: 8
+2026-07-19 17:42:08,903 [INFO ]  gop: 8
+2026-07-19 17:42:08,903 [INFO ]  val_gop: 8
+2026-07-19 17:42:08,903 [INFO ]  q_num: 64
+2026-07-19 17:42:08,903 [INFO ]  test_qp: 63
+2026-07-19 17:42:08,903 [INFO ]  warmup_epochs: 20
+2026-07-19 17:42:08,903 [INFO ]  qp_warmup_epochs: 48
+2026-07-19 17:42:08,903 [INFO ]  cuda: True
+2026-07-19 17:42:08,903 [INFO ]  save: True
+2026-07-19 17:42:08,903 [INFO ]  seed: 7
+2026-07-19 17:42:08,903 [INFO ]  clip_max_norm: 1.0
+2026-07-19 17:42:08,903 [INFO ]  local_rank: -1
+2026-07-19 17:42:08,903 [INFO ]  checkpoint: None
+2026-07-19 17:42:08,903 [INFO ]  output_dir: ./pretrained_uf
+2026-07-19 17:42:08,903 [INFO ]  name: 2026-07-19_17_42_08
+2026-07-19 17:42:08,905 [INFO ]  log_interval: 1
+2026-07-19 17:42:08,905 [INFO ]  check_exists: False
+2026-07-19 17:42:08,905 [INFO ]  max_samples: 5
+2026-07-19 17:42:08,905 [INFO ]  pad_last: True
+2026-07-19 17:42:08,905 [INFO ]  drop_last: False
+2026-07-19 17:42:08,905 [INFO ]  distributed: False
+2026-07-19 17:42:08,905 [INFO ]  ========================================

@@ -486,6 +486,58 @@ class DCVCUF(CompressionModel):
         self.max_dpb_size = 1
         self.curr_poc = 0
 
+    @staticmethod
+    def _quantize_ste(x):
+        return x + (torch.round(x) - x).detach()
+
+    @staticmethod
+    def _probs_to_bits(probs):
+        return -torch.log2(torch.clamp(probs, min=1e-9))
+
+    def _get_y_bits(self, y_q, scales):
+        scales = torch.clamp(scales, min=0.11, max=16.0)
+        gaussian = torch.distributions.normal.Normal(torch.zeros_like(scales), scales)
+        probs = gaussian.cdf(y_q + 0.5) - gaussian.cdf(y_q - 0.5)
+        return self._probs_to_bits(probs)
+
+    def _get_z_bits(self, z_hat, qp):
+        index = torch.tensor([qp], dtype=torch.int32, device=z_hat.device)
+        probs = self.bit_estimator_z.get_cdf(z_hat + 0.5, index) - \
+            self.bit_estimator_z.get_cdf(z_hat - 0.5, index)
+        return self._probs_to_bits(probs)
+
+    def forward(self, x, qp):
+        if isinstance(qp, torch.Tensor):
+            qp = int(qp.item())
+
+        q_encoder = self.q_encoder[qp:qp + 1]
+        q_decoder = self.q_decoder[qp:qp + 1]
+        q_entropy = self.q_entropy[qp:qp + 1]
+
+        ref_feature = self.apply_feature_adaptor()
+        h0 = self.apply_hidden_adaptor(ref_feature)
+        h1 = self.context_extractor.forward_part1(ref_feature, h0)
+        ctx = self.context_extractor.forward_part2(h1)
+        y = self.encoder(x, ctx, q_encoder)
+        z = self.hyper_encoder(self.pad_for_y(y))
+        z_hat = self._quantize_ste(z)
+        params = self.res_prior_param_decoder(z_hat, ctx, q_entropy)
+        y_q, y_scales, y_hat = self.compress_prior_uf_quadtree_sem(y, params)
+        x_hat, feature = self.get_recon_and_feature(y_hat, ctx, q_decoder)
+
+        _, frame_num, _, height, width = x.shape
+        pixel_num = frame_num * height * width
+        bpp_y = self._get_y_bits(y_q, y_scales).flatten(1).sum(1) / pixel_num
+        bpp_z = self._get_z_bits(z_hat, qp).flatten(1).sum(1) / pixel_num
+        mse = F.mse_loss(x_hat, x, reduction="none").flatten(1).mean(1)
+
+        self.add_ref_chunk(feature=feature, chunk=x_hat, hidden=h1)
+        return {
+            "bpp": bpp_y + bpp_z,
+            "mse": mse,
+            "x_hat": x_hat,
+        }
+
     def add_ref_chunk(self, feature=None, chunk=None, hidden=None, increase_poc=True):
         if feature is not None and (feature.dim() != 4 or feature.shape[1] != g_ch_d):
             raise RuntimeError(

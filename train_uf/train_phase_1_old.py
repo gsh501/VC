@@ -18,10 +18,6 @@ from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
-
 from src_uf.dataload_uf import UFDataSet, UFTestDataSet
 from src_uf.models_uf.image_model import DCVCUFIntra
 from src_uf.utils.transforms import yuv_444_to_420
@@ -301,7 +297,7 @@ def train_one_epoch(epoch, model, criterion, train_dataloader, optimizer, device
     return avg_loss
 
 
-def val_epoch(epoch, model, criterion, val_dataloader, device, args):
+def test_epoch(epoch, model, criterion, test_dataloader, device, args):
     model.eval()
     loss_meter = AverageMeter()
     bpp_meter = AverageMeter()
@@ -310,7 +306,7 @@ def val_epoch(epoch, model, criterion, val_dataloader, device, args):
     lamada = qp_to_lambda(args.test_qp, q_num=args.q_num)
 
     with torch.no_grad():
-        for batch in val_dataloader:
+        for batch in test_dataloader:
             ref_chunk = batch[0].to(device, non_blocking=True)
 
             out_net = model(ref_chunk, args.test_qp)
@@ -329,7 +325,7 @@ def val_epoch(epoch, model, criterion, val_dataloader, device, args):
 
     if is_main_process():
         logging.info(
-            "Val epoch %d: Loss: %.3f | PSNR: %.3f | MSE: %.8f | BPP: %.4f",
+            "Test epoch %d: Loss: %.3f | PSNR: %.3f | MSE: %.8f | BPP: %.4f",
             epoch,
             avg_loss,
             avg_psnr,
@@ -395,22 +391,22 @@ def build_train_loader(args):
     return dataloader, sampler
 
 
-def build_val_loader(args):
-    if not args.val_filelist:
+def build_test_loader(args):
+    if not args.test_filelist:
         return None, None
 
-    val_dataset = UFTestDataSet(
-        root=args.val_dataset,
-        filelist=args.val_filelist,
-        gop=args.val_gop,
+    test_dataset = UFTestDataSet(
+        root=args.test_dataset,
+        filelist=args.test_filelist,
+        gop=args.test_gop,
         chunk_size=args.chunk_size,
         testfull=True,
         pad_last=True,
     )
-    sampler = DistributedSampler(val_dataset, shuffle=False) if args.distributed else None
+    sampler = DistributedSampler(test_dataset, shuffle=False) if args.distributed else None
     dataloader = DataLoader(
-        val_dataset,
-        batch_size=args.val_batch_size,
+        test_dataset,
+        batch_size=args.test_batch_size,
         shuffle=False,
         num_workers=args.num_workers,
         pin_memory=(args.cuda and torch.cuda.is_available()),
@@ -425,24 +421,25 @@ def parse_args(argv):
     parser.add_argument("-m", "--model", default="DCVCUFIntra", choices=["DCVCUFIntra"])
     parser.add_argument("--train-root", type=str, default=None)
     parser.add_argument("--train-filelist", type=str, default=None)
-    parser.add_argument("-td", "--val-dataset", "--test-dataset", dest="val_dataset", type=str, default=None)
-    parser.add_argument("-td_l", "--val-filelist", "--test-filelist", dest="val_filelist", type=str, default=None)
+    parser.add_argument("-td", "--test-dataset", type=str, default=None)
+    parser.add_argument("-td_l", "--test-filelist", type=str, default=None)
     parser.add_argument("-e", "--epochs", default=120, type=int)
     parser.add_argument("-lr", "--learning-rate", default=1e-4, type=float)
     parser.add_argument("-n", "--num-workers", type=int, default=4)
-    parser.add_argument("-q", "--quality-level", type=int, default=1)
+    parser.add_argument("-q", "--quality-level", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=4)
-    parser.add_argument("--val-batch-size", "--test-batch-size", dest="val_batch_size", type=int, default=1)
+    parser.add_argument("--test-batch-size", type=int, default=1)
     parser.add_argument("--patch-size", type=int, nargs=2, default=(256, 256))
     parser.add_argument("--chunk-size", type=int, default=8)
     parser.add_argument("--gop", type=int, default=8)
-    parser.add_argument("--val-gop", "--test-gop", dest="val_gop", type=int, default=8)
+    parser.add_argument("--test-gop", type=int, default=8)
     parser.add_argument("--q-num", type=int, default=64)
     parser.add_argument("--test-qp", type=int, default=63)
     parser.add_argument("--warmup-epochs", type=int, default=20)        #损失函数热身
     parser.add_argument("--qp-warmup-epochs", type=int, default=48)     #qp的热身
     parser.add_argument("--cuda", type=str2bool, default=True)
     parser.add_argument("--save", type=str2bool, default=True)
+    parser.add_argument("--save-interval", type=int, default=10)
     parser.add_argument("--seed", type=int, default=7)       #设置随机数种子
     parser.add_argument("--clip_max_norm", default=1.0, type=float)
     parser.add_argument("--local-rank", "--local_rank", dest="local_rank", default=-1, type=int)
@@ -458,10 +455,12 @@ def parse_args(argv):
 
     if args.chunk_size != 8 or args.gop != 8:
         raise ValueError("UF phase 1 trains the 8-frame intra chunk, so chunk_size and gop must both be 8.")
-    if args.val_gop != 8:
-        raise ValueError("UF phase 1 validation also uses val_gop=8.")
+    if args.test_gop != 8:
+        raise ValueError("UF phase 1 validation also uses test_gop=8.")
     if not (0 <= args.test_qp < args.q_num <= 64):
         raise ValueError("test_qp must be in [0, q_num), and q_num must be <= 64 for DCVCUFIntra.")
+    if args.save_interval < 1:
+        raise ValueError("save_interval must be >= 1.")
     return args
 
 
@@ -484,7 +483,7 @@ def main(argv):
         logging.info("=" * 40)
 
     train_dataloader, train_sampler = build_train_loader(args)
-    val_dataloader, val_sampler = build_val_loader(args)
+    test_dataloader, test_sampler = build_test_loader(args)
 
     model = DCVCUFIntra().to(device)
     if args.distributed:
@@ -512,8 +511,8 @@ def main(argv):
     for epoch in range(last_epoch, args.epochs):
         if train_sampler is not None:
             train_sampler.set_epoch(epoch)
-        if val_sampler is not None:
-            val_sampler.set_epoch(epoch)
+        if test_sampler is not None:
+            test_sampler.set_epoch(epoch)
 
         adjust_learning_rate(optimizer, epoch, args.learning_rate, factors)
         if is_main_process():
@@ -524,12 +523,12 @@ def main(argv):
             epoch, model, criterion, train_dataloader, optimizer, device, args
         )
 
-        if val_dataloader is not None:
-            loss = val_epoch(epoch, model, criterion, val_dataloader, device, args)
+        if test_dataloader is not None:
+            loss = test_epoch(epoch, model, criterion, test_dataloader, device, args)
         else:
             loss = train_loss
             if is_main_process():
-                logging.info("No val_filelist is set; using train loss for checkpoint selection.")
+                logging.info("No test_filelist is set; using train loss for checkpoint selection.")
 
         is_best = loss < best_loss
         best_loss = min(loss, best_loss)
@@ -556,6 +555,15 @@ def main(argv):
                 best_loss,
             )
 
+            if (epoch + 1) % args.save_interval == 0:
+                periodic_filename = "checkpoint_epoch_%04d_uf_phase_1.pth.tar" % (epoch + 1)
+                save_checkpoint(
+                    checkpoint_state,
+                    False,
+                    base_dir,
+                    filename=periodic_filename,
+                )
+                logging.info("Saved periodic checkpoint: %s", os.path.join(base_dir, periodic_filename))
         elif is_main_process():
             logging.info(
                 "Checkpoint epoch %d: save disabled | best model saved: no | current loss: %.6f | best loss: %.6f",
