@@ -1,6 +1,13 @@
 #1.从github下下载相关代码
 网址：git@github.com:gsh501/VC.git
 
+更改提交：
+git add .
+git commit -m "×××××"
+git push origin
+
+下载：
+
 #2.配置环境，在dcvc-rt环境基础上加入imageio
 pip install imageio
 
