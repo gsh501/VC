@@ -22,6 +22,8 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
+os.environ.setdefault("DCVC_DISABLE_CUSTOMIZED_CUDA_INFERENCE", "1")
+
 from src_uf.dataload_uf import UFDataSet, UFTestDataSet
 from src_uf.models_uf.image_model import DCVCUFIntra
 from src_uf.utils.transforms import yuv_444_to_420
@@ -95,7 +97,7 @@ class RateDistortionLoss(nn.Module):
             "mse_loss": result["mse"],
         }
         if 0 <= epoch < self.warmup_epochs:
-            out["loss"] = out["mse_loss"] * 5000 + 0.01 * out["bpp_loss"]
+            out["loss"] = out["mse_loss"] * 5000 
         else:
             out["loss"] = lamada * out["mse_loss"] + out["bpp_loss"]
         return out

@@ -6,6 +6,11 @@ from pathlib import Path
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp"}
 FRAME_RE = re.compile(r"^im0*(\d+)\.(png|jpg|jpeg|bmp)$", re.IGNORECASE)
+DATA_ROOT_CANDIDATES = [
+    Path("/home/admin1/Data/data/data"),
+    Path(__file__).resolve().parents[1] / "Partvimeo_32" / "sequence",
+    Path(__file__).resolve().parents[1] / "Partvimeo_32",
+]
 
 
 def repo_root():
@@ -13,15 +18,24 @@ def repo_root():
 
 
 def default_dataset_root():
+    for root in (
+        Path("/home/admin1/Data/data/data"),
+        repo_root() / "Partvimeo_32",
+    ):
+        if root.exists():
+            return root
     return repo_root() / "Partvimeo_32"
 
 
 def default_sequences_dir():
-    return default_dataset_root() / "sequence"
+    for root in DATA_ROOT_CANDIDATES:
+        if root.exists():
+            return root
+    return default_dataset_root()
 
 
 def default_output_dir():
-    return default_dataset_root()
+    return repo_root() / "datafiles" / "train_phase_2"
 
 
 def frame_sort_key(path):
@@ -143,13 +157,13 @@ def write_filelist(frames, output_path, relative_to=None):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Split Partvimeo_32 32-frame GOP folders into train/val/test filelists."
+        description="Split 32-frame GOP folders into train/val/test filelists."
     )
     parser.add_argument(
         "--sequences-dir",
         type=Path,
         default=default_sequences_dir(),
-        help="Root directory containing folders like sequence/8270427/00001.",
+        help="Root directory containing folders like 8270427/00001 or sequence/8270427/00001.",
     )
     parser.add_argument(
         "--output-dir",
@@ -178,7 +192,14 @@ def parse_args():
     parser.add_argument(
         "--drop-incomplete",
         action="store_true",
+        default=True,
         help="Drop folders that do not contain exactly im001..im032.",
+    )
+    parser.add_argument(
+        "--strict",
+        dest="drop_incomplete",
+        action="store_false",
+        help="Keep the old strict behavior and fail when any folder is incomplete.",
     )
     return parser.parse_args()
 
@@ -221,6 +242,16 @@ def main():
         raise RuntimeError(
             "Found incomplete GOP folders. Fix the dataset or pass --drop-incomplete to skip them."
         )
+    elif incomplete:
+        for folder, missing, extra, frame_count in incomplete[:20]:
+            print(f"skipped incomplete GOP: {folder}")
+            print(f"  frame_count: {frame_count}")
+            if missing:
+                print(f"  missing: {', '.join(missing)}")
+            if extra:
+                print(f"  extra: {', '.join(extra)}")
+        if len(incomplete) > 20:
+            print(f"... {len(incomplete) - 20} more incomplete GOP folders")
 
     sequence_frames = complete_sequence_frames
     if not sequence_frames:

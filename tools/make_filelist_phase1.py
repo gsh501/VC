@@ -28,7 +28,7 @@ def default_sequences_dir():
 
 
 def default_output_dir():
-    return default_dataset_root()
+    return repo_root() / "datafiles" / "train_phase_1"
 
 
 def frame_sort_key(path):

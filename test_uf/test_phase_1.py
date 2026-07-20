@@ -22,8 +22,6 @@ from src_uf.models_uf.image_model import DCVCUFIntra
 from src_uf.utils.transforms import ycbcr2rgb, yuv_444_to_420
 
 
-DEFAULT_CKPT_DIR = REPO_ROOT / "pretrained_uf" / "DCVCUFIntra"
-DEFAULT_CKPT_PATTERN = "checkpoint*_uf_phase_1.pth.tar"
 DEFAULT_TEST_DATASET = Path("/home/admin1/Data/data/testdata")
 DEFAULT_TEST_CLASSES = ["HEVC_B", "HEVC_C", "HEVC_D", "HEVC_E"]
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp"}
@@ -123,16 +121,6 @@ def torch_load(path, map_location="cpu"):
         return torch.load(path, map_location=map_location)
 
 
-def is_unreadable_checkpoint_error(exc):
-    message = str(exc).lower()
-    return (
-        isinstance(exc, (EOFError, FileNotFoundError, OSError))
-        or "pytorchstreamreader failed reading zip archive" in message
-        or "failed finding central directory" in message
-        or "not a zip file" in message
-    )
-
-
 def default_log_path():
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     return Path(__file__).resolve().parent / f"test_phase_1_{timestamp}.log"
@@ -162,40 +150,6 @@ def maybe_synchronize(device):
         torch.cuda.synchronize(device)
 
 
-def checkpoint_sort_key(path):
-    path = Path(path)
-    epoch_match = re.search(r"checkpoint_epoch_(\d+)_uf_phase_1\.pth\.tar$", path.name)
-    if "best_loss" in path.name:
-        priority = 0
-        epoch = -1
-    elif epoch_match:
-        priority = 1
-        epoch = int(epoch_match.group(1))
-    elif path.name == "checkpoint_uf_phase_1.pth.tar":
-        priority = 2
-        epoch = 10**9
-    else:
-        priority = 3
-        epoch = 10**9
-    return path.parent.as_posix(), priority, epoch, path.name
-
-
-def collect_checkpoints(args):
-    if args.checkpoint is not None:
-        return [Path(args.checkpoint).resolve()]
-
-    checkpoint_dir = Path(args.checkpoint_dir).resolve()
-    if checkpoint_dir.is_file():
-        return [checkpoint_dir]
-
-    if args.recursive_checkpoints:
-        checkpoints = checkpoint_dir.rglob(args.checkpoint_pattern)
-    else:
-        checkpoints = checkpoint_dir.glob(args.checkpoint_pattern)
-    checkpoints = [path.resolve() for path in checkpoints if path.is_file()]
-    return sorted(checkpoints, key=checkpoint_sort_key)
-
-
 def checkpoint_label(checkpoint_path, checkpoint_dir):
     checkpoint_path = Path(checkpoint_path).resolve()
     for base in (Path(checkpoint_dir).resolve(), REPO_ROOT):
@@ -204,6 +158,33 @@ def checkpoint_label(checkpoint_path, checkpoint_dir):
         except ValueError:
             pass
     return checkpoint_path.as_posix()
+
+
+def disable_custom_cuda_inference():
+    import src_uf.layers.cuda_inference as cuda_inference
+    import src_uf.layers.layers as layer_ops
+    import src_uf.models_uf.image_model as image_model
+
+    cuda_inference.CUSTOMIZED_CUDA_INFERENCE = False
+    layer_ops.CUSTOMIZED_CUDA_INFERENCE = False
+    image_model.CUSTOMIZED_CUDA_INFERENCE = False
+
+
+def set_custom_cuda_kernel_enabled(
+    depthconv_enabled,
+    subpel_enabled,
+    round_int8_enabled,
+    clamp_reciprocal_enabled,
+    build_index_enabled,
+):
+    import src_uf.layers.cuda_inference as cuda_inference
+    import src_uf.layers.layers as layer_ops
+
+    layer_ops.DISABLE_DEPTHCONV_PROXY = not depthconv_enabled
+    layer_ops.DISABLE_SUBPEL_PROXY = not subpel_enabled
+    cuda_inference.DISABLE_ROUND_AND_TO_INT8_CUDA = not round_int8_enabled
+    cuda_inference.DISABLE_CLAMP_RECIPROCAL_CUDA = not clamp_reciprocal_enabled
+    cuda_inference.DISABLE_BUILD_INDEX_CUDA = not build_index_enabled
 
 
 def load_checkpoint(model, checkpoint_path):
@@ -499,40 +480,22 @@ def parse_args(argv):
     parser.add_argument(
         "--checkpoint",
         type=str,
-        default=None,
-        help="Optional single checkpoint path. If omitted, all checkpoints in --checkpoint-dir are tested.",
-    )
-    parser.add_argument(
-        "--checkpoint-dir",
-        type=str,
-        default=str(DEFAULT_CKPT_DIR),
-        help="Directory that contains checkpoints to test.",
-    )
-    parser.add_argument(
-        "--checkpoint-pattern",
-        type=str,
-        default=DEFAULT_CKPT_PATTERN,
-        help="Glob pattern used under --checkpoint-dir when --checkpoint is omitted.",
-    )
-    parser.add_argument(
-        "--recursive-checkpoints",
-        type=str2bool,
-        default=True,
-        help="Recursively scan --checkpoint-dir for checkpoints.",
+        required=True,
+        help="The single phase-1 checkpoint to test.",
     )
     parser.add_argument(
         "-td",
         "--test-dataset",
         type=str,
-        default=str(DEFAULT_TEST_DATASET),
-        help="Test root. Without --test-filelist, this should contain HEVC_B/C/D/E.",
+        default="/home/admin1/Data/data/vimeo_septuplet",
+        help="Test root used when paths in --test-filelist are relative.",
     )
     parser.add_argument(
         "-td_l",
         "--test-filelist",
         type=str,
-        default=None,
-        help="Optional text file that lists frames to test. If omitted, HEVC folders are scanned.",
+        default="/home/admin1/Data/data/vimeo_septuplet/test_filelist.txt",
+        help="Text file containing the test frame paths.",
     )
     parser.add_argument("--test-classes", nargs="*", default=DEFAULT_TEST_CLASSES)
     parser.add_argument("--expected-frames", type=int, default=96)
@@ -554,6 +517,42 @@ def parse_args(argv):
     parser.add_argument("--pad-last", type=str2bool, default=True)
     parser.add_argument("--cuda", type=str2bool, default=True)
     parser.add_argument("--device", type=str, default=None)
+    parser.add_argument(
+        "--disable-custom-cuda",
+        type=str2bool,
+        default=False,
+        help="Disable customized CUDA inference kernels and use PyTorch fallback layers.",
+    )
+    parser.add_argument(
+        "--disable-depthconv-proxy",
+        type=str2bool,
+        default=True,
+        help="Disable DepthConvProxy while keeping other customized CUDA inference kernels enabled.",
+    )
+    parser.add_argument(
+        "--disable-subpel-proxy",
+        type=str2bool,
+        default=True,
+        help="Disable SubpelConv2xProxy while keeping other customized CUDA inference kernels enabled.",
+    )
+    parser.add_argument(
+        "--disable-round-int8-cuda",
+        type=str2bool,
+        default=True,
+        help="Disable round_and_to_int8_cuda while keeping other customized CUDA inference kernels enabled.",
+    )
+    parser.add_argument(
+        "--disable-clamp-reciprocal-cuda",
+        type=str2bool,
+        default=True,
+        help="Disable clamp_reciprocal_with_quant_cuda while keeping other customized CUDA inference kernels enabled.",
+    )
+    parser.add_argument(
+        "--disable-build-index-cuda",
+        type=str2bool,
+        default=True,
+        help="Disable build_index_dec/enc CUDA kernels while keeping other customized CUDA inference kernels enabled.",
+    )
     parser.add_argument("--log-interval", type=int, default=10)
     parser.add_argument(
         "--log-file",
@@ -593,10 +592,8 @@ def parse_args(argv):
         raise ValueError("model_align must be a multiple of align and >= align.")
     if not (0 <= min(args.qps) and max(args.qps) < args.q_num <= 64):
         raise ValueError("All qps must be in [0, q_num), and q_num must be <= 64.")
-    if args.checkpoint is not None and not Path(args.checkpoint).is_file():
+    if not Path(args.checkpoint).is_file():
         raise FileNotFoundError(f"Checkpoint not found: {args.checkpoint}")
-    if args.checkpoint is None and not Path(args.checkpoint_dir).exists():
-        raise FileNotFoundError(f"Checkpoint dir not found: {args.checkpoint_dir}")
     if args.test_filelist is not None and not Path(args.test_filelist).is_file():
         raise FileNotFoundError(f"Test filelist not found: {args.test_filelist}")
     if args.test_dataset is not None and not Path(args.test_dataset).exists():
@@ -608,6 +605,15 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
+    if args.disable_custom_cuda:
+        disable_custom_cuda_inference()
+    set_custom_cuda_kernel_enabled(
+        not args.disable_depthconv_proxy,
+        not args.disable_subpel_proxy,
+        not args.disable_round_int8_cuda,
+        not args.disable_clamp_reciprocal_cuda,
+        not args.disable_build_index_cuda,
+    )
     torch.backends.cudnn.benchmark = args.device.type == "cuda"
 
     log_path, log_handle, original_stdout = setup_stdout_log(
@@ -621,36 +627,30 @@ def main(argv):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        checkpoints = collect_checkpoints(args)
-        if not checkpoints:
-            raise RuntimeError(
-                f"No checkpoints matched {args.checkpoint_pattern} under {args.checkpoint_dir}"
-            )
-
+        checkpoint_path = Path(args.checkpoint).resolve()
+        label = checkpoint_label(checkpoint_path, REPO_ROOT)
+        checkpoint_output_dir = output_dir / sanitize_path_part(label)
         print(f"Log file: {log_path}")
         print(f"Output dir: {output_dir}")
         print(f"Fixed QP(s): {', '.join(str(qp) for qp in args.qps)}")
         print(f"Save bin: {args.save_bin}")
         print(f"Save recon: {args.save_recon} | save_recon_chunks: {args.save_recon_chunks}")
         print(f"Device: {args.device}")
-        if args.checkpoint is not None:
-            print(f"Checkpoint: {args.checkpoint}")
-        else:
-            print(f"Checkpoint dir: {args.checkpoint_dir}")
-            print(f"Checkpoint pattern: {args.checkpoint_pattern}")
-            print(f"Checkpoints found: {len(checkpoints)}")
-            for idx, checkpoint_path in enumerate(checkpoints, 1):
-                print(
-                    "  {:02d}. {}".format(
-                        idx,
-                        checkpoint_label(checkpoint_path, args.checkpoint_dir),
-                    )
-                )
+        print(f"Custom CUDA inference: {not args.disable_custom_cuda}")
+        print(f"DepthConvProxy: {not args.disable_custom_cuda and not args.disable_depthconv_proxy}")
+        print(f"SubpelConv2xProxy: {not args.disable_custom_cuda and not args.disable_subpel_proxy}")
+        print(f"round_and_to_int8_cuda: {not args.disable_custom_cuda and not args.disable_round_int8_cuda}")
+        print(
+            "clamp_reciprocal_with_quant_cuda: "
+            f"{not args.disable_custom_cuda and not args.disable_clamp_reciprocal_cuda}"
+        )
+        print(
+            "build_index_dec/enc_cuda: "
+            f"{not args.disable_custom_cuda and not args.disable_build_index_cuda}"
+        )
+        print(f"Checkpoint: {checkpoint_path}")
         print(f"Test dataset: {args.test_dataset}")
-        if args.test_filelist is not None:
-            print(f"Test filelist: {args.test_filelist}")
-        else:
-            print(f"Test classes: {', '.join(args.test_classes)}")
+        print(f"Test filelist: {args.test_filelist}")
 
         dataset, dataloader, source_info = build_test_loader(args)
         if source_info is not None:
@@ -668,76 +668,41 @@ def main(argv):
             )
         )
 
-        all_results = []
-        failed_checkpoints = []
-
-        for checkpoint_idx, checkpoint_path in enumerate(checkpoints, 1):
-            label = checkpoint_label(checkpoint_path, args.checkpoint_dir)
-            checkpoint_output_dir = output_dir / sanitize_path_part(label)
-            print("\n" + "=" * 80)
-            print(f"Checkpoint {checkpoint_idx}/{len(checkpoints)}: {label}")
-            print(f"Path: {checkpoint_path}")
-            print(f"Checkpoint output dir: {checkpoint_output_dir}")
-
-            model = DCVCUFIntra()
-            try:
-                checkpoint = load_checkpoint(model, checkpoint_path)
-            except Exception as exc:
-                if args.checkpoint is not None or not is_unreadable_checkpoint_error(exc):
-                    raise
-                print(f"Skipping unreadable checkpoint {label}: {exc}")
-                failed_checkpoints.append(
-                    {
-                        "checkpoint": label,
-                        "path": str(checkpoint_path),
-                        "error": str(exc),
-                    }
-                )
-                continue
-            model = model.to(args.device)
-            model.eval()
-
-            checkpoint_epoch = checkpoint.get("epoch", None)
-            checkpoint_epoch = int(checkpoint_epoch) if checkpoint_epoch is not None else -1
-            print(f"checkpoint_epoch: {checkpoint_epoch}")
-
-            checkpoint_results = []
-            for qp in args.qps:
-                result = test_one_qp(model, dataloader, qp, checkpoint_output_dir, args)
-                result["checkpoint"] = label
-                result["checkpoint_path"] = str(checkpoint_path)
-                result["checkpoint_epoch"] = checkpoint_epoch
-                checkpoint_results.append(result)
-                all_results.append(result)
-
-            print("\nCheckpoint Summary")
-            print("QP | Chunks | PSNR | YUV420-PSNR | MSE | BPP | Bin(B) | Enc(ms) | Dec(ms) | Time(s)")
-            for result in checkpoint_results:
-                print(
-                    "{qp:2d} | {chunks:6d} | {psnr:.3f} | {psnr_yuv420:.3f} | "
-                    "{mse:.8f} | {bpp:.4f} | {bin_bytes:.2f} | "
-                    "{enc_ms:.2f} | {dec_ms:.2f} | {time:.2f}".format(
-                        **result
-                    )
-                )
-
-            del model
-            if args.device.type == "cuda":
-                torch.cuda.empty_cache()
-
         print("\n" + "=" * 80)
-        print("All Checkpoints Summary")
-        print("Checkpoint | QP | Epoch | Chunks | PSNR | YUV420-PSNR | MSE | BPP | Bin(B) | Enc(ms) | Dec(ms) | Time(s)")
-        for result in all_results:
+        print(f"Testing checkpoint: {label}")
+        print(f"Checkpoint output dir: {checkpoint_output_dir}")
+
+        model = DCVCUFIntra()
+        checkpoint = load_checkpoint(model, checkpoint_path)
+        model = model.to(args.device)
+        model.eval()
+
+        checkpoint_epoch = checkpoint.get("epoch", None)
+        checkpoint_epoch = int(checkpoint_epoch) if checkpoint_epoch is not None else -1
+        print(f"checkpoint_epoch: {checkpoint_epoch}")
+
+        checkpoint_results = []
+        for qp in args.qps:
+            result = test_one_qp(model, dataloader, qp, checkpoint_output_dir, args)
+            result["checkpoint"] = label
+            result["checkpoint_path"] = str(checkpoint_path)
+            result["checkpoint_epoch"] = checkpoint_epoch
+            checkpoint_results.append(result)
+
+        print("\nTest Summary")
+        print("QP | Chunks | PSNR | YUV420-PSNR | MSE | BPP | Bin(B) | Enc(ms) | Dec(ms) | Time(s)")
+        for result in checkpoint_results:
             print(
-                "{checkpoint} | {qp:2d} | {checkpoint_epoch:5d} | {chunks:6d} | "
-                "{psnr:.3f} | {psnr_yuv420:.3f} | {mse:.8f} | {bpp:.4f} | "
-                "{bin_bytes:.2f} | {enc_ms:.2f} | {dec_ms:.2f} | {time:.2f}".format(**result)
+                "{qp:2d} | {chunks:6d} | {psnr:.3f} | {psnr_yuv420:.3f} | "
+                "{mse:.8f} | {bpp:.4f} | {bin_bytes:.2f} | "
+                "{enc_ms:.2f} | {dec_ms:.2f} | {time:.2f}".format(
+                    **result
+                )
             )
-        if failed_checkpoints:
-            print("\nSkipped Checkpoints")
-            for item in failed_checkpoints:
-                print(f"{item['checkpoint']} | {item['error']}")
+
+        del model
+        if args.device.type == "cuda":
+            torch.cuda.empty_cache()
         print(f"\nSaved outputs to: {output_dir}")
         print(f"\nSaved log to: {log_path}")
     finally:

@@ -8,6 +8,10 @@ if CUSTOMIZED_CUDA_INFERENCE:
     from .cuda_inference import DepthConvProxy, SubpelConv2xProxy
 
 
+DISABLE_DEPTHCONV_PROXY = False
+DISABLE_SUBPEL_PROXY = False
+
+
 class WSiLU(nn.Module):
     def __init__(self):
         super().__init__()
@@ -52,6 +56,9 @@ class SubpelConv2x(nn.Module):
         return torch.cat((out, to_cat), dim=1)
 
     def forward_cuda(self, x, to_cat=None, cat_at_front=True):
+        if DISABLE_SUBPEL_PROXY:
+            return self.forward_torch(x, to_cat, cat_at_front)
+
         if self.proxy is None:
             self.proxy = SubpelConv2xProxy()
             self.proxy.set_param(self.conv[0].weight, self.conv[0].bias, self.padding)
@@ -106,6 +113,9 @@ class DepthConvBlock(nn.Module):
         return out
 
     def forward_cuda(self, x, quant_step=None, to_cat=None, cat_at_front=True):
+        if DISABLE_DEPTHCONV_PROXY or self.adaptor is not None:
+            return self.forward_torch(x, quant_step, to_cat, cat_at_front)
+
         if self.proxy is None:
             self.proxy = DepthConvProxy()
             if self.adaptor is not None:
@@ -125,7 +135,7 @@ class DepthConvBlock(nn.Module):
                                      self.shortcut)
 
         if quant_step is not None:
-            return self.proxy.forward_with_quant_step(x, quant_step)
+            return self.proxy.forward(x) * quant_step
         if to_cat is not None:
             return self.proxy.forward_with_cat(x, to_cat, cat_at_front)
 

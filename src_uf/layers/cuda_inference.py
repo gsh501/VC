@@ -8,23 +8,33 @@ import torch.nn.functional as F
 
 
 CUSTOMIZED_CUDA_INFERENCE = False
-try:
-    from inference_extensions_cuda import process_with_mask_cuda, combine_for_reading_2x_cuda, \
-        restore_y_2x_cuda, restore_y_4x_cuda, build_index_dec_cuda, \
-        round_and_to_int8_cuda, clamp_reciprocal_with_quant_cuda, bias_quant_cuda, \
-        add_and_multiply_cuda, bias_pixel_shuffle_8_cuda, replicate_pad_cuda, \
-        build_index_enc_cuda, DepthConvProxy, SubpelConv2xProxy  # noqa: F401
-    CUSTOMIZED_CUDA_INFERENCE = True
-except Exception:  # pylint: disable=W0718
-    pass
+DISABLE_CUSTOMIZED_CUDA_INFERENCE = os.environ.get(
+    "DCVC_DISABLE_CUSTOMIZED_CUDA_INFERENCE", ""
+).lower() in ("1", "true", "yes", "y", "on")
+DISABLE_ROUND_AND_TO_INT8_CUDA = False
+DISABLE_CLAMP_RECIPROCAL_CUDA = False
+DISABLE_BUILD_INDEX_CUDA = False
+
+if not DISABLE_CUSTOMIZED_CUDA_INFERENCE:
+    try:
+        from inference_extensions_cuda import process_with_mask_cuda, combine_for_reading_2x_cuda, \
+            restore_y_2x_cuda, restore_y_4x_cuda, build_index_dec_cuda, \
+            round_and_to_int8_cuda, clamp_reciprocal_with_quant_cuda, bias_quant_cuda, \
+            add_and_multiply_cuda, bias_pixel_shuffle_8_cuda, replicate_pad_cuda, \
+            build_index_enc_cuda, DepthConvProxy, SubpelConv2xProxy  # noqa: F401
+        CUSTOMIZED_CUDA_INFERENCE = True
+    except Exception:  # pylint: disable=W0718
+        pass
 
 
-if not CUSTOMIZED_CUDA_INFERENCE and 'SUPPRESS_CUSTOM_KERNEL_WARNING' not in os.environ:
+if DISABLE_CUSTOMIZED_CUDA_INFERENCE and 'SUPPRESS_CUSTOM_KERNEL_WARNING' not in os.environ:
+    print("customized cuda implementation for inference disabled, fallback to pytorch.")
+elif not CUSTOMIZED_CUDA_INFERENCE and 'SUPPRESS_CUSTOM_KERNEL_WARNING' not in os.environ:
     print("cannot import cuda implementation for inference, fallback to pytorch.")
 
 
 def round_and_to_int8(z):
-    if CUSTOMIZED_CUDA_INFERENCE and z.is_cuda:
+    if CUSTOMIZED_CUDA_INFERENCE and z.is_cuda and not DISABLE_ROUND_AND_TO_INT8_CUDA:
         z_int8 = round_and_to_int8_cuda(z)
         return z, z_int8
 
@@ -34,7 +44,7 @@ def round_and_to_int8(z):
 
 
 def clamp_reciprocal_with_quant(q_dec, y, min_val):
-    if CUSTOMIZED_CUDA_INFERENCE and q_dec.is_cuda:
+    if CUSTOMIZED_CUDA_INFERENCE and q_dec.is_cuda and not DISABLE_CLAMP_RECIPROCAL_CUDA:
         # q_dec is not inplace modified at decoder side
         q_dec = clamp_reciprocal_with_quant_cuda(q_dec, y, min_val)
         return q_dec, y
@@ -122,7 +132,7 @@ def restore_y_4x(y, means, mask):
 
 
 def build_index_dec(scales, scale_min, scale_max, log_scale_min, log_step_recip, skip_thres=None):
-    if CUSTOMIZED_CUDA_INFERENCE and scales.is_cuda:
+    if CUSTOMIZED_CUDA_INFERENCE and scales.is_cuda and not DISABLE_BUILD_INDEX_CUDA:
         out = torch.empty_like(scales, dtype=torch.uint8)
         skip_cond = None
         if skip_thres is not None:
@@ -145,7 +155,7 @@ def build_index_dec(scales, scale_min, scale_max, log_scale_min, log_step_recip,
 
 def build_index_enc(symbols, scales, scale_min, scale_max, log_scale_min,
                     log_step_recip, skip_thres=None):
-    if CUSTOMIZED_CUDA_INFERENCE and scales.is_cuda:
+    if CUSTOMIZED_CUDA_INFERENCE and scales.is_cuda and not DISABLE_BUILD_INDEX_CUDA:
         out = torch.empty_like(scales, dtype=torch.int16)
         skip_cond = None
         if skip_thres is not None:

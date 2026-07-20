@@ -302,7 +302,7 @@ def parse_args(argv=None):
     parser.add_argument("--train-filelist", required=True)
     parser.add_argument("--val-dataset", "--test-dataset", "-td", dest="val_dataset", default=None)
     parser.add_argument("--val-filelist", "--test-filelist", "-td_l", dest="val_filelist", default=None)
-    parser.add_argument("--phase1-checkpoint", default=r"D:\Drivers\Desktop\VC-gsh\pretrained_uf\DCVCUFIntra\2\checkpoint_best_loss_uf_phase_1.pth.tar")
+    parser.add_argument("--phase1-checkpoint", default=None)
     parser.add_argument("--checkpoint", default=None)
     parser.add_argument("--output-dir", default="./pretrained_uf")
     parser.add_argument("--quality-level", "-q", type=int, default=1)
