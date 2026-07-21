@@ -97,7 +97,7 @@ class RateDistortionLoss(nn.Module):
             "mse_loss": result["mse"],
         }
         if 0 <= epoch < self.warmup_epochs:
-            out["loss"] = out["mse_loss"] * 5000 
+            out["loss"] = out["mse_loss"] * 5000 + 0.01 * out["bpp_loss"]
         else:
             out["loss"] = lamada * out["mse_loss"] + out["bpp_loss"]
         return out

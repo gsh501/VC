@@ -494,7 +494,7 @@ def parse_args(argv):
         "-td_l",
         "--test-filelist",
         type=str,
-        default="/home/admin1/Data/data/vimeo_septuplet/test_filelist.txt",
+        default="/home/admin1/gsh/VC/datafiles/trian_phase_1/test_filelist.txt",
         help="Text file containing the test frame paths.",
     )
     parser.add_argument("--test-classes", nargs="*", default=DEFAULT_TEST_CLASSES)

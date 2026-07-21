@@ -12,8 +12,10 @@ git pull --ff-only origin gsh
 git log --oneline -5
 git status -sb
 
+
 #2.配置环境，在dcvc-rt环境基础上加入imageio
 pip install imageio
+
 
 #3.第一阶段训练（8帧训练DCVCUFIntra）：采用Partvimeo_7数据进行
 ##3.1划分数据集make_filelist_phase1.py
@@ -101,9 +103,15 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nproc_per_node=4 train_uf/train_phase_2.
 ##4.4测试第二阶段训练结果test_phase_2.py
 cd /home/admin1/gsh/VC
 
+联合权重测试：
 /home/admin1/anaconda3/envs/dcvc/bin/python test_uf/test_phase_2.py \
   --checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/checkpoint_best_loss_uf_phase_2.pth.tar \
-  --test-filelist /home/admin1/gsh/VC/datafiles/train_phase_2/test_filelist_phase2.txt \
-  --qps 20 \
-  --num-workers 4 \
-  --device cuda:4
+  --device cuda:4 \
+  --qps 20
+
+分离权重测试：
+/home/admin1/anaconda3/envs/dcvc/bin/python test_uf/test_phase_2.py \
+  --video-checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/checkpoint_best_loss_uf_phase_2_video.pth.tar \
+  --intra-checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/checkpoint_best_loss_uf_phase_2_intra.pth.tar \
+  --device cuda:4 \
+  --qps 20
