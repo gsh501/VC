@@ -1,0 +1,280 @@
+2026-07-23 09:30:57,346 [INFO] ======================= 2026-07-23_09_30_56 =======================
+2026-07-23 09:30:57,347 [INFO] train_root: None
+2026-07-23 09:30:57,347 [INFO] train_filelist: /home/admin1/gsh/VC/datafiles/train_phase_2/train_filelist_phase2.txt
+2026-07-23 09:30:57,347 [INFO] val_dataset: None
+2026-07-23 09:30:57,347 [INFO] val_filelist: /home/admin1/gsh/VC/datafiles/train_phase_2/val_filelist_phase2.txt
+2026-07-23 09:30:57,347 [INFO] phase1_checkpoint: /home/admin1/gsh/VC/pretrained_uf/DCVCUFIntra/4/checkpoint_best_loss_uf_phase_1.pth.tar
+2026-07-23 09:30:57,347 [INFO] checkpoint: None
+2026-07-23 09:30:57,347 [INFO] output_dir: /home/admin1/gsh/VC/pretrained_uf
+2026-07-23 09:30:57,347 [INFO] quality_level: 4
+2026-07-23 09:30:57,347 [INFO] epochs: 180
+2026-07-23 09:30:57,347 [INFO] learning_rate: 0.0001
+2026-07-23 09:30:57,347 [INFO] num_workers: 4
+2026-07-23 09:30:57,347 [INFO] batch_size: 4
+2026-07-23 09:30:57,347 [INFO] val_batch_size: 1
+2026-07-23 09:30:57,347 [INFO] patch_size: [256, 256]
+2026-07-23 09:30:57,347 [INFO] q_num: 64
+2026-07-23 09:30:57,347 [INFO] test_qp: 63
+2026-07-23 09:30:57,347 [INFO] warmup_epochs: 20
+2026-07-23 09:30:57,347 [INFO] qp_warmup_epochs: 48
+2026-07-23 09:30:57,347 [INFO] cuda: True
+2026-07-23 09:30:57,347 [INFO] save: True
+2026-07-23 09:30:57,347 [INFO] freeze_intra: False
+2026-07-23 09:30:57,347 [INFO] seed: 7
+2026-07-23 09:30:57,347 [INFO] clip_max_norm: 1.0
+2026-07-23 09:30:57,347 [INFO] local_rank: 0
+2026-07-23 09:30:57,348 [INFO] log_interval: 500
+2026-07-23 09:30:57,348 [INFO] check_exists: False
+2026-07-23 09:30:57,348 [INFO] max_samples: None
+2026-07-23 09:30:57,348 [INFO] drop_last: False
+2026-07-23 09:30:57,348 [INFO] name: 2026-07-23_09_30_56
+2026-07-23 09:30:57,348 [INFO] distributed: True
+2026-07-23 09:31:01,517 [INFO] TensorBoard logging to: /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/tensorboard/2026-07-23_09_30_56
+2026-07-23 09:31:03,062 [INFO] Trainable params: 78835696 / 78835696
+2026-07-23 09:31:03,063 [INFO] ====== Current epoch 0 ======
+2026-07-23 09:31:03,063 [INFO] Learning rate: 0.0001
+2026-07-23 09:31:07,320 [INFO] [0/1057] | Loss: 853.796 | PSNR: 7.676 | MSE: 0.17075877 | BPP: 0.2309 | QP: 63
+2026-07-23 09:35:15,403 [INFO] [500/1057] | Loss: 112.249 | PSNR: 16.488 | MSE: 0.02244966 | BPP: 0.1032 | QP: 63
+2026-07-23 09:39:21,744 [INFO] [1000/1057] | Loss: 80.200 | PSNR: 17.948 | MSE: 0.01603972 | BPP: 0.0975 | QP: 63
+2026-07-23 09:39:48,447 [INFO] Train epoch 0: Loss: 77.221 | PSNR: 18.112 | MSE: 0.01544395 | BPP: 0.0972
+2026-07-23 09:41:10,046 [INFO] Val epoch 0: Loss: 32.882 | PSNR: 21.820 | MSE: 0.00657622 | BPP: 0.0865
+2026-07-23 09:41:13,050 [INFO] Checkpoint epoch 0: best model saved: yes | current loss: 32.881945 | best loss: 32.881945
+2026-07-23 09:41:13,050 [INFO] Global step updated to: 1057
+2026-07-23 09:41:13,051 [INFO] ====== Current epoch 1 ======
+2026-07-23 09:41:13,051 [INFO] Learning rate: 0.0001
+2026-07-23 09:41:14,816 [INFO] [0/1057] | Loss: 31.610 | PSNR: 21.992 | MSE: 0.00632175 | BPP: 0.0916 | QP: 63
+2026-07-23 09:45:25,293 [INFO] [500/1057] | Loss: 29.546 | PSNR: 22.285 | MSE: 0.00590894 | BPP: 0.0890 | QP: 63
+2026-07-23 09:49:35,659 [INFO] [1000/1057] | Loss: 25.920 | PSNR: 22.853 | MSE: 0.00518383 | BPP: 0.0907 | QP: 63
+2026-07-23 09:50:01,631 [INFO] Train epoch 1: Loss: 25.217 | PSNR: 22.973 | MSE: 0.00504329 | BPP: 0.0901
+2026-07-23 09:51:22,933 [INFO] Val epoch 1: Loss: 18.090 | PSNR: 24.416 | MSE: 0.00361779 | BPP: 0.0877
+2026-07-23 09:51:26,711 [INFO] Checkpoint epoch 1: best model saved: yes | current loss: 18.089837 | best loss: 18.089837
+2026-07-23 09:51:26,712 [INFO] Global step updated to: 2114
+2026-07-23 09:51:26,712 [INFO] ====== Current epoch 2 ======
+2026-07-23 09:51:26,712 [INFO] Learning rate: 0.0001
+2026-07-23 09:51:28,353 [INFO] [0/1057] | Loss: 14.690 | PSNR: 25.320 | MSE: 0.00293789 | BPP: 0.0876 | QP: 63
+2026-07-23 09:55:37,269 [INFO] [500/1057] | Loss: 15.954 | PSNR: 24.961 | MSE: 0.00319066 | BPP: 0.0936 | QP: 63
+2026-07-23 09:59:47,436 [INFO] [1000/1057] | Loss: 14.245 | PSNR: 25.453 | MSE: 0.00284888 | BPP: 0.0937 | QP: 63
+2026-07-23 10:00:14,557 [INFO] Train epoch 2: Loss: 14.261 | PSNR: 25.448 | MSE: 0.00285203 | BPP: 0.0939
+2026-07-23 10:01:36,028 [INFO] Val epoch 2: Loss: 11.314 | PSNR: 26.454 | MSE: 0.00226260 | BPP: 0.0888
+2026-07-23 10:01:39,837 [INFO] Checkpoint epoch 2: best model saved: yes | current loss: 11.313908 | best loss: 11.313908
+2026-07-23 10:01:39,837 [INFO] Global step updated to: 3171
+2026-07-23 10:01:39,837 [INFO] ====== Current epoch 3 ======
+2026-07-23 10:01:39,837 [INFO] Learning rate: 0.0001
+2026-07-23 10:01:41,470 [INFO] [0/1057] | Loss: 9.436 | PSNR: 27.242 | MSE: 0.00188701 | BPP: 0.0944 | QP: 63
+2026-07-23 10:05:54,984 [INFO] [500/1057] | Loss: 11.406 | PSNR: 26.419 | MSE: 0.00228110 | BPP: 0.0955 | QP: 63
+2026-07-23 10:10:07,423 [INFO] [1000/1057] | Loss: 10.449 | PSNR: 26.800 | MSE: 0.00208954 | BPP: 0.0950 | QP: 63
+2026-07-23 10:10:33,922 [INFO] Train epoch 3: Loss: 10.159 | PSNR: 26.922 | MSE: 0.00203163 | BPP: 0.0946
+2026-07-23 10:11:54,580 [INFO] Val epoch 3: Loss: 7.801 | PSNR: 28.069 | MSE: 0.00156002 | BPP: 0.0919
+2026-07-23 10:11:58,425 [INFO] Checkpoint epoch 3: best model saved: yes | current loss: 7.801029 | best loss: 7.801029
+2026-07-23 10:11:58,426 [INFO] Global step updated to: 4228
+2026-07-23 10:11:58,426 [INFO] ====== Current epoch 4 ======
+2026-07-23 10:11:58,426 [INFO] Learning rate: 0.0001
+2026-07-23 10:11:59,956 [INFO] [0/1057] | Loss: 4.996 | PSNR: 30.004 | MSE: 0.00099900 | BPP: 0.0689 | QP: 63
+2026-07-23 10:16:12,957 [INFO] [500/1057] | Loss: 7.784 | PSNR: 28.078 | MSE: 0.00155665 | BPP: 0.0948 | QP: 63
+2026-07-23 10:20:26,812 [INFO] [1000/1057] | Loss: 7.658 | PSNR: 28.149 | MSE: 0.00153149 | BPP: 0.0965 | QP: 63
+2026-07-23 10:20:54,186 [INFO] Train epoch 4: Loss: 7.693 | PSNR: 28.129 | MSE: 0.00153848 | BPP: 0.0969
+2026-07-23 10:22:15,398 [INFO] Val epoch 4: Loss: 6.740 | PSNR: 28.704 | MSE: 0.00134784 | BPP: 0.0928
+2026-07-23 10:22:19,348 [INFO] Checkpoint epoch 4: best model saved: yes | current loss: 6.740104 | best loss: 6.740104
+2026-07-23 10:22:19,348 [INFO] Global step updated to: 5285
+2026-07-23 10:22:19,348 [INFO] ====== Current epoch 5 ======
+2026-07-23 10:22:19,348 [INFO] Learning rate: 0.0001
+2026-07-23 10:22:21,012 [INFO] [0/1057] | Loss: 7.100 | PSNR: 28.478 | MSE: 0.00141981 | BPP: 0.1173 | QP: 63
+2026-07-23 10:26:31,629 [INFO] [500/1057] | Loss: 6.889 | PSNR: 28.609 | MSE: 0.00137762 | BPP: 0.0998 | QP: 63
+2026-07-23 10:30:42,432 [INFO] [1000/1057] | Loss: 6.928 | PSNR: 28.585 | MSE: 0.00138531 | BPP: 0.1013 | QP: 63
+2026-07-23 10:31:09,627 [INFO] Train epoch 5: Loss: 6.999 | PSNR: 28.540 | MSE: 0.00139958 | BPP: 0.1013
+2026-07-23 10:32:30,156 [INFO] Val epoch 5: Loss: 6.355 | PSNR: 28.959 | MSE: 0.00127077 | BPP: 0.0962
+2026-07-23 10:32:34,375 [INFO] Checkpoint epoch 5: best model saved: yes | current loss: 6.354792 | best loss: 6.354792
+2026-07-23 10:32:34,375 [INFO] Global step updated to: 6342
+2026-07-23 10:32:34,375 [INFO] ====== Current epoch 6 ======
+2026-07-23 10:32:34,375 [INFO] Learning rate: 0.0001
+2026-07-23 10:32:35,960 [INFO] [0/1057] | Loss: 6.335 | PSNR: 28.973 | MSE: 0.00126676 | BPP: 0.0919 | QP: 63
+2026-07-23 10:36:48,071 [INFO] [500/1057] | Loss: 6.404 | PSNR: 28.926 | MSE: 0.00128059 | BPP: 0.1032 | QP: 63
+2026-07-23 10:40:59,167 [INFO] [1000/1057] | Loss: 5.847 | PSNR: 29.321 | MSE: 0.00116921 | BPP: 0.1026 | QP: 63
+2026-07-23 10:41:27,075 [INFO] Train epoch 6: Loss: 5.825 | PSNR: 29.338 | MSE: 0.00116480 | BPP: 0.1028
+2026-07-23 10:42:47,944 [INFO] Val epoch 6: Loss: 4.144 | PSNR: 30.816 | MSE: 0.00082871 | BPP: 0.0961
+2026-07-23 10:42:51,922 [INFO] Checkpoint epoch 6: best model saved: yes | current loss: 4.144487 | best loss: 4.144487
+2026-07-23 10:42:51,922 [INFO] Global step updated to: 7399
+2026-07-23 10:42:51,922 [INFO] ====== Current epoch 7 ======
+2026-07-23 10:42:51,922 [INFO] Learning rate: 0.0001
+2026-07-23 10:42:53,459 [INFO] [0/1057] | Loss: 4.878 | PSNR: 30.108 | MSE: 0.00097541 | BPP: 0.1040 | QP: 63
+2026-07-23 10:47:03,740 [INFO] [500/1057] | Loss: 4.463 | PSNR: 30.494 | MSE: 0.00089241 | BPP: 0.1031 | QP: 63
+2026-07-23 10:51:17,517 [INFO] [1000/1057] | Loss: 4.371 | PSNR: 30.585 | MSE: 0.00087394 | BPP: 0.1047 | QP: 63
+2026-07-23 10:51:45,203 [INFO] Train epoch 7: Loss: 4.563 | PSNR: 30.398 | MSE: 0.00091236 | BPP: 0.1053
+2026-07-23 10:53:06,549 [INFO] Val epoch 7: Loss: 3.975 | PSNR: 30.997 | MSE: 0.00079486 | BPP: 0.1008
+2026-07-23 10:53:10,431 [INFO] Checkpoint epoch 7: best model saved: yes | current loss: 3.975319 | best loss: 3.975319
+2026-07-23 10:53:10,431 [INFO] Global step updated to: 8456
+2026-07-23 10:53:10,431 [INFO] ====== Current epoch 8 ======
+2026-07-23 10:53:10,432 [INFO] Learning rate: 0.0001
+2026-07-23 10:53:12,007 [INFO] [0/1057] | Loss: 2.406 | PSNR: 33.179 | MSE: 0.00048098 | BPP: 0.1034 | QP: 63
+2026-07-23 10:57:24,474 [INFO] [500/1057] | Loss: 4.391 | PSNR: 30.565 | MSE: 0.00087797 | BPP: 0.1075 | QP: 63
+2026-07-23 11:01:40,741 [INFO] [1000/1057] | Loss: 4.291 | PSNR: 30.665 | MSE: 0.00085801 | BPP: 0.1068 | QP: 63
+2026-07-23 11:02:07,578 [INFO] Train epoch 8: Loss: 4.320 | PSNR: 30.636 | MSE: 0.00086379 | BPP: 0.1068
+2026-07-23 11:03:27,298 [INFO] Val epoch 8: Loss: 3.990 | PSNR: 30.981 | MSE: 0.00079777 | BPP: 0.1051
+2026-07-23 11:03:29,908 [INFO] Checkpoint epoch 8: best model saved: no | current loss: 3.989890 | best loss: 3.975319
+2026-07-23 11:03:29,908 [INFO] Global step updated to: 9513
+2026-07-23 11:03:29,908 [INFO] ====== Current epoch 9 ======
+2026-07-23 11:03:29,908 [INFO] Learning rate: 0.0001
+2026-07-23 11:03:31,514 [INFO] [0/1057] | Loss: 5.124 | PSNR: 29.894 | MSE: 0.00102465 | BPP: 0.1124 | QP: 63
+2026-07-23 11:07:46,540 [INFO] [500/1057] | Loss: 4.187 | PSNR: 30.772 | MSE: 0.00083709 | BPP: 0.1070 | QP: 63
+2026-07-23 11:12:00,083 [INFO] [1000/1057] | Loss: 4.135 | PSNR: 30.827 | MSE: 0.00082669 | BPP: 0.1070 | QP: 63
+2026-07-23 11:12:26,140 [INFO] Train epoch 9: Loss: 4.126 | PSNR: 30.835 | MSE: 0.00082504 | BPP: 0.1071
+2026-07-23 11:13:45,839 [INFO] Val epoch 9: Loss: 3.710 | PSNR: 31.297 | MSE: 0.00074181 | BPP: 0.1008
+2026-07-23 11:13:49,701 [INFO] Checkpoint epoch 9: best model saved: yes | current loss: 3.710038 | best loss: 3.710038
+2026-07-23 11:13:49,701 [INFO] Global step updated to: 10570
+2026-07-23 11:13:49,701 [INFO] ====== Current epoch 10 ======
+2026-07-23 11:13:49,701 [INFO] Learning rate: 0.0001
+2026-07-23 11:13:51,356 [INFO] [0/1057] | Loss: 4.507 | PSNR: 30.452 | MSE: 0.00090109 | BPP: 0.1271 | QP: 63
+2026-07-23 11:18:01,769 [INFO] [500/1057] | Loss: 4.004 | PSNR: 30.966 | MSE: 0.00080053 | BPP: 0.1080 | QP: 63
+2026-07-23 11:22:13,107 [INFO] [1000/1057] | Loss: 3.909 | PSNR: 31.070 | MSE: 0.00078157 | BPP: 0.1080 | QP: 63
+2026-07-23 11:22:39,667 [INFO] Train epoch 10: Loss: 3.965 | PSNR: 31.009 | MSE: 0.00079274 | BPP: 0.1087
+2026-07-23 11:23:59,206 [INFO] Val epoch 10: Loss: 3.404 | PSNR: 31.670 | MSE: 0.00068069 | BPP: 0.1035
+2026-07-23 11:24:03,122 [INFO] Checkpoint epoch 10: best model saved: yes | current loss: 3.404493 | best loss: 3.404493
+2026-07-23 11:24:03,122 [INFO] Global step updated to: 11627
+2026-07-23 11:24:03,122 [INFO] ====== Current epoch 11 ======
+2026-07-23 11:24:03,122 [INFO] Learning rate: 0.0001
+2026-07-23 11:24:04,756 [INFO] [0/1057] | Loss: 6.684 | PSNR: 28.740 | MSE: 0.00133666 | BPP: 0.1218 | QP: 63
+2026-07-23 11:28:17,970 [INFO] [500/1057] | Loss: 3.768 | PSNR: 31.230 | MSE: 0.00075343 | BPP: 0.1110 | QP: 63
+2026-07-23 11:32:30,552 [INFO] [1000/1057] | Loss: 3.755 | PSNR: 31.245 | MSE: 0.00075071 | BPP: 0.1124 | QP: 63
+2026-07-23 11:32:57,538 [INFO] Train epoch 11: Loss: 3.719 | PSNR: 31.287 | MSE: 0.00074355 | BPP: 0.1129
+2026-07-23 11:34:15,931 [INFO] Val epoch 11: Loss: 3.243 | PSNR: 31.881 | MSE: 0.00064844 | BPP: 0.1096
+2026-07-23 11:34:19,715 [INFO] Checkpoint epoch 11: best model saved: yes | current loss: 3.243291 | best loss: 3.243291
+2026-07-23 11:34:19,715 [INFO] Global step updated to: 12684
+2026-07-23 11:34:19,715 [INFO] ====== Current epoch 12 ======
+2026-07-23 11:34:19,715 [INFO] Learning rate: 0.0001
+2026-07-23 11:34:21,368 [INFO] [0/1057] | Loss: 2.011 | PSNR: 33.958 | MSE: 0.00040194 | BPP: 0.1024 | QP: 63
+2026-07-23 11:38:35,602 [INFO] [500/1057] | Loss: 3.541 | PSNR: 31.500 | MSE: 0.00070802 | BPP: 0.1147 | QP: 63
+2026-07-23 11:42:48,757 [INFO] [1000/1057] | Loss: 3.593 | PSNR: 31.437 | MSE: 0.00071827 | BPP: 0.1154 | QP: 63
+2026-07-23 11:43:15,849 [INFO] Train epoch 12: Loss: 3.506 | PSNR: 31.543 | MSE: 0.00070104 | BPP: 0.1150
+2026-07-23 11:44:34,959 [INFO] Val epoch 12: Loss: 3.048 | PSNR: 32.151 | MSE: 0.00060947 | BPP: 0.1100
+2026-07-23 11:44:39,039 [INFO] Checkpoint epoch 12: best model saved: yes | current loss: 3.048433 | best loss: 3.048433
+2026-07-23 11:44:39,039 [INFO] Global step updated to: 13741
+2026-07-23 11:44:39,039 [INFO] ====== Current epoch 13 ======
+2026-07-23 11:44:39,039 [INFO] Learning rate: 0.0001
+2026-07-23 11:44:40,691 [INFO] [0/1057] | Loss: 3.542 | PSNR: 31.499 | MSE: 0.00070816 | BPP: 0.1155 | QP: 63
+2026-07-23 11:48:53,099 [INFO] [500/1057] | Loss: 3.420 | PSNR: 31.650 | MSE: 0.00068384 | BPP: 0.1177 | QP: 63
+2026-07-23 11:53:06,766 [INFO] [1000/1057] | Loss: 3.405 | PSNR: 31.670 | MSE: 0.00068070 | BPP: 0.1165 | QP: 63
+2026-07-23 11:53:34,164 [INFO] Train epoch 13: Loss: 3.362 | PSNR: 31.725 | MSE: 0.00067214 | BPP: 0.1165
+2026-07-23 11:54:54,181 [INFO] Val epoch 13: Loss: 2.955 | PSNR: 32.286 | MSE: 0.00059072 | BPP: 0.1102
+2026-07-23 11:54:58,044 [INFO] Checkpoint epoch 13: best model saved: yes | current loss: 2.954698 | best loss: 2.954698
+2026-07-23 11:54:58,045 [INFO] Global step updated to: 14798
+2026-07-23 11:54:58,045 [INFO] ====== Current epoch 14 ======
+2026-07-23 11:54:58,045 [INFO] Learning rate: 0.0001
+2026-07-23 11:54:59,689 [INFO] [0/1057] | Loss: 7.219 | PSNR: 28.406 | MSE: 0.00144352 | BPP: 0.1343 | QP: 63
+2026-07-23 11:59:12,618 [INFO] [500/1057] | Loss: 3.331 | PSNR: 31.765 | MSE: 0.00066604 | BPP: 0.1177 | QP: 63
+2026-07-23 12:03:26,116 [INFO] [1000/1057] | Loss: 3.314 | PSNR: 31.788 | MSE: 0.00066254 | BPP: 0.1169 | QP: 63
+2026-07-23 12:03:53,940 [INFO] Train epoch 14: Loss: 3.277 | PSNR: 31.837 | MSE: 0.00065514 | BPP: 0.1169
+2026-07-23 12:05:13,613 [INFO] Val epoch 14: Loss: 2.869 | PSNR: 32.415 | MSE: 0.00057349 | BPP: 0.1096
+2026-07-23 12:05:17,481 [INFO] Checkpoint epoch 14: best model saved: yes | current loss: 2.868543 | best loss: 2.868543
+2026-07-23 12:05:17,481 [INFO] Global step updated to: 15855
+2026-07-23 12:05:17,481 [INFO] ====== Current epoch 15 ======
+2026-07-23 12:05:17,481 [INFO] Learning rate: 0.0001
+2026-07-23 12:05:19,118 [INFO] [0/1057] | Loss: 2.295 | PSNR: 33.383 | MSE: 0.00045883 | BPP: 0.1166 | QP: 63
+2026-07-23 12:09:31,642 [INFO] [500/1057] | Loss: 3.212 | PSNR: 31.924 | MSE: 0.00064216 | BPP: 0.1173 | QP: 63
+2026-07-23 12:13:43,288 [INFO] [1000/1057] | Loss: 3.194 | PSNR: 31.947 | MSE: 0.00063863 | BPP: 0.1182 | QP: 63
+2026-07-23 12:14:10,821 [INFO] Train epoch 15: Loss: 3.145 | PSNR: 32.015 | MSE: 0.00062878 | BPP: 0.1174
+2026-07-23 12:15:29,973 [INFO] Val epoch 15: Loss: 2.747 | PSNR: 32.604 | MSE: 0.00054908 | BPP: 0.1124
+2026-07-23 12:15:33,869 [INFO] Checkpoint epoch 15: best model saved: yes | current loss: 2.746530 | best loss: 2.746530
+2026-07-23 12:15:33,869 [INFO] Global step updated to: 16912
+2026-07-23 12:15:33,870 [INFO] ====== Current epoch 16 ======
+2026-07-23 12:15:33,870 [INFO] Learning rate: 0.0001
+2026-07-23 12:15:35,511 [INFO] [0/1057] | Loss: 3.040 | PSNR: 32.162 | MSE: 0.00060784 | BPP: 0.1054 | QP: 63
+2026-07-23 12:19:46,435 [INFO] [500/1057] | Loss: 2.939 | PSNR: 32.309 | MSE: 0.00058764 | BPP: 0.1161 | QP: 63
+2026-07-23 12:23:56,941 [INFO] [1000/1057] | Loss: 3.046 | PSNR: 32.154 | MSE: 0.00060892 | BPP: 0.1176 | QP: 63
+2026-07-23 12:24:23,840 [INFO] Train epoch 16: Loss: 3.097 | PSNR: 32.081 | MSE: 0.00061925 | BPP: 0.1175
+2026-07-23 12:25:44,711 [INFO] Val epoch 16: Loss: 2.742 | PSNR: 32.610 | MSE: 0.00054827 | BPP: 0.1107
+2026-07-23 12:25:48,627 [INFO] Checkpoint epoch 16: best model saved: yes | current loss: 2.742438 | best loss: 2.742438
+2026-07-23 12:25:48,627 [INFO] Global step updated to: 17969
+2026-07-23 12:25:48,627 [INFO] ====== Current epoch 17 ======
+2026-07-23 12:25:48,627 [INFO] Learning rate: 0.0001
+2026-07-23 12:25:50,183 [INFO] [0/1057] | Loss: 2.766 | PSNR: 32.573 | MSE: 0.00055301 | BPP: 0.1121 | QP: 63
+2026-07-23 12:30:02,750 [INFO] [500/1057] | Loss: 2.979 | PSNR: 32.251 | MSE: 0.00059555 | BPP: 0.1165 | QP: 63
+2026-07-23 12:34:14,527 [INFO] [1000/1057] | Loss: 3.026 | PSNR: 32.182 | MSE: 0.00060502 | BPP: 0.1169 | QP: 63
+2026-07-23 12:34:41,205 [INFO] Train epoch 17: Loss: 3.008 | PSNR: 32.209 | MSE: 0.00060138 | BPP: 0.1174
+2026-07-23 12:36:00,946 [INFO] Val epoch 17: Loss: 2.757 | PSNR: 32.587 | MSE: 0.00055113 | BPP: 0.1106
+2026-07-23 12:36:03,540 [INFO] Checkpoint epoch 17: best model saved: no | current loss: 2.756775 | best loss: 2.742438
+2026-07-23 12:36:03,540 [INFO] Global step updated to: 19026
+2026-07-23 12:36:03,540 [INFO] ====== Current epoch 18 ======
+2026-07-23 12:36:03,540 [INFO] Learning rate: 0.0001
+2026-07-23 12:36:05,330 [INFO] [0/1057] | Loss: 1.709 | PSNR: 34.665 | MSE: 0.00034155 | BPP: 0.1284 | QP: 63
+2026-07-23 12:40:16,466 [INFO] [500/1057] | Loss: 2.959 | PSNR: 32.280 | MSE: 0.00059153 | BPP: 0.1186 | QP: 63
+2026-07-23 12:44:28,733 [INFO] [1000/1057] | Loss: 3.016 | PSNR: 32.198 | MSE: 0.00060290 | BPP: 0.1194 | QP: 63
+2026-07-23 12:44:55,988 [INFO] Train epoch 18: Loss: 2.933 | PSNR: 32.318 | MSE: 0.00058643 | BPP: 0.1183
+2026-07-23 12:46:15,412 [INFO] Val epoch 18: Loss: 2.577 | PSNR: 32.880 | MSE: 0.00051524 | BPP: 0.1125
+2026-07-23 12:46:19,313 [INFO] Checkpoint epoch 18: best model saved: yes | current loss: 2.577313 | best loss: 2.577313
+2026-07-23 12:46:19,314 [INFO] Global step updated to: 20083
+2026-07-23 12:46:19,314 [INFO] ====== Current epoch 19 ======
+2026-07-23 12:46:19,314 [INFO] Learning rate: 0.0001
+2026-07-23 12:46:21,010 [INFO] [0/1057] | Loss: 3.082 | PSNR: 32.103 | MSE: 0.00061618 | BPP: 0.1346 | QP: 63
+2026-07-23 12:50:33,839 [INFO] [500/1057] | Loss: 2.955 | PSNR: 32.286 | MSE: 0.00059074 | BPP: 0.1197 | QP: 63
+2026-07-23 12:54:47,947 [INFO] [1000/1057] | Loss: 2.887 | PSNR: 32.388 | MSE: 0.00057709 | BPP: 0.1195 | QP: 63
+2026-07-23 12:55:15,456 [INFO] Train epoch 19: Loss: 2.872 | PSNR: 32.409 | MSE: 0.00057424 | BPP: 0.1188
+2026-07-23 12:56:33,332 [INFO] Val epoch 19: Loss: 2.486 | PSNR: 33.037 | MSE: 0.00049696 | BPP: 0.1126
+2026-07-23 12:56:37,354 [INFO] Checkpoint epoch 19: best model saved: yes | current loss: 2.485944 | best loss: 2.485944
+2026-07-23 12:56:37,354 [INFO] Global step updated to: 21140
+2026-07-23 12:56:37,354 [INFO] ====== Current epoch 20 ======
+2026-07-23 12:56:37,354 [INFO] Learning rate: 0.0001
+2026-07-23 12:56:38,982 [INFO] [0/1057] | Loss: 0.921 | PSNR: 29.908 | MSE: 0.00102136 | BPP: 0.1366 | QP: 63
+2026-07-23 13:00:52,516 [INFO] [500/1057] | Loss: 0.514 | PSNR: 32.485 | MSE: 0.00056425 | BPP: 0.0802 | QP: 63
+2026-07-23 13:05:05,242 [INFO] [1000/1057] | Loss: 0.509 | PSNR: 32.448 | MSE: 0.00056913 | BPP: 0.0718 | QP: 63
+2026-07-23 13:05:32,097 [INFO] Train epoch 20: Loss: 0.511 | PSNR: 32.421 | MSE: 0.00057260 | BPP: 0.0715
+2026-07-23 13:06:51,442 [INFO] Val epoch 20: Loss: 0.446 | PSNR: 32.978 | MSE: 0.00050370 | BPP: 0.0590
+2026-07-23 13:06:55,422 [INFO] Checkpoint epoch 20: best model saved: yes | current loss: 0.445822 | best loss: 0.445822
+2026-07-23 13:06:55,422 [INFO] Global step updated to: 22197
+2026-07-23 13:06:55,422 [INFO] ====== Current epoch 21 ======
+2026-07-23 13:06:55,422 [INFO] Learning rate: 0.0001
+2026-07-23 13:06:57,064 [INFO] [0/1057] | Loss: 0.653 | PSNR: 31.188 | MSE: 0.00076068 | BPP: 0.0686 | QP: 63
+2026-07-23 13:11:10,389 [INFO] [500/1057] | Loss: 0.492 | PSNR: 32.504 | MSE: 0.00056176 | BPP: 0.0602 | QP: 63
+2026-07-23 13:15:25,368 [INFO] [1000/1057] | Loss: 0.485 | PSNR: 32.567 | MSE: 0.00055369 | BPP: 0.0595 | QP: 63
+2026-07-23 13:15:52,999 [INFO] Train epoch 21: Loss: 0.491 | PSNR: 32.506 | MSE: 0.00056161 | BPP: 0.0595
+2026-07-23 13:17:12,350 [INFO] Val epoch 21: Loss: 0.434 | PSNR: 33.044 | MSE: 0.00049613 | BPP: 0.0531
+2026-07-23 13:17:16,093 [INFO] Checkpoint epoch 21: best model saved: yes | current loss: 0.434133 | best loss: 0.434133
+2026-07-23 13:17:16,093 [INFO] Global step updated to: 23254
+2026-07-23 13:17:16,094 [INFO] ====== Current epoch 22 ======
+2026-07-23 13:17:16,094 [INFO] Learning rate: 0.0001
+2026-07-23 13:17:17,493 [INFO] [0/1057] | Loss: 0.191 | PSNR: 37.029 | MSE: 0.00019818 | BPP: 0.0390 | QP: 63
+2026-07-23 13:21:28,452 [INFO] [500/1057] | Loss: 0.481 | PSNR: 32.577 | MSE: 0.00055250 | BPP: 0.0568 | QP: 63
+2026-07-23 13:25:41,914 [INFO] [1000/1057] | Loss: 0.477 | PSNR: 32.617 | MSE: 0.00054738 | BPP: 0.0567 | QP: 63
+2026-07-23 13:26:09,281 [INFO] Train epoch 22: Loss: 0.478 | PSNR: 32.610 | MSE: 0.00054825 | BPP: 0.0569
+2026-07-23 13:27:29,204 [INFO] Val epoch 22: Loss: 0.417 | PSNR: 33.222 | MSE: 0.00047622 | BPP: 0.0514
+2026-07-23 13:27:33,167 [INFO] Checkpoint epoch 22: best model saved: yes | current loss: 0.417115 | best loss: 0.417115
+2026-07-23 13:27:33,167 [INFO] Global step updated to: 24311
+2026-07-23 13:27:33,167 [INFO] ====== Current epoch 23 ======
+2026-07-23 13:27:33,167 [INFO] Learning rate: 0.0001
+2026-07-23 13:27:34,586 [INFO] [0/1057] | Loss: 0.499 | PSNR: 32.256 | MSE: 0.00059484 | BPP: 0.0425 | QP: 63
+2026-07-23 13:31:47,772 [INFO] [500/1057] | Loss: 0.489 | PSNR: 32.495 | MSE: 0.00056304 | BPP: 0.0568 | QP: 63
+2026-07-23 13:35:58,889 [INFO] [1000/1057] | Loss: 0.478 | PSNR: 32.596 | MSE: 0.00055000 | BPP: 0.0557 | QP: 63
+2026-07-23 13:36:26,375 [INFO] Train epoch 23: Loss: 0.469 | PSNR: 32.686 | MSE: 0.00053873 | BPP: 0.0556
+2026-07-23 13:37:46,485 [INFO] Val epoch 23: Loss: 0.413 | PSNR: 33.261 | MSE: 0.00047200 | BPP: 0.0508
+2026-07-23 13:37:50,345 [INFO] Checkpoint epoch 23: best model saved: yes | current loss: 0.413323 | best loss: 0.413323
+2026-07-23 13:37:50,345 [INFO] Global step updated to: 25368
+2026-07-23 13:37:50,346 [INFO] ====== Current epoch 24 ======
+2026-07-23 13:37:50,346 [INFO] Learning rate: 0.0001
+2026-07-23 13:37:51,827 [INFO] [0/1057] | Loss: 0.360 | PSNR: 33.911 | MSE: 0.00040639 | BPP: 0.0476 | QP: 63
+2026-07-23 13:42:02,444 [INFO] [500/1057] | Loss: 0.458 | PSNR: 32.794 | MSE: 0.00052556 | BPP: 0.0548 | QP: 63
+2026-07-23 13:46:14,799 [INFO] [1000/1057] | Loss: 0.462 | PSNR: 32.754 | MSE: 0.00053038 | BPP: 0.0551 | QP: 63
+2026-07-23 13:46:41,784 [INFO] Train epoch 24: Loss: 0.462 | PSNR: 32.754 | MSE: 0.00053036 | BPP: 0.0549
+2026-07-23 13:48:00,441 [INFO] Val epoch 24: Loss: 0.421 | PSNR: 33.173 | MSE: 0.00048159 | BPP: 0.0510
+2026-07-23 13:48:03,051 [INFO] Checkpoint epoch 24: best model saved: no | current loss: 0.420838 | best loss: 0.413323
+2026-07-23 13:48:03,052 [INFO] Global step updated to: 26425
+2026-07-23 13:48:03,052 [INFO] ====== Current epoch 25 ======
+2026-07-23 13:48:03,052 [INFO] Learning rate: 0.0001
+2026-07-23 13:48:04,765 [INFO] [0/1057] | Loss: 0.955 | PSNR: 29.371 | MSE: 0.00115595 | BPP: 0.0668 | QP: 63
+2026-07-23 13:52:18,204 [INFO] [500/1057] | Loss: 0.469 | PSNR: 32.675 | MSE: 0.00054009 | BPP: 0.0546 | QP: 63
+2026-07-23 13:56:29,912 [INFO] [1000/1057] | Loss: 0.464 | PSNR: 32.735 | MSE: 0.00053276 | BPP: 0.0549 | QP: 63
+2026-07-23 13:56:56,296 [INFO] Train epoch 25: Loss: 0.451 | PSNR: 32.864 | MSE: 0.00051718 | BPP: 0.0541
+2026-07-23 13:58:15,182 [INFO] Val epoch 25: Loss: 0.404 | PSNR: 33.364 | MSE: 0.00046092 | BPP: 0.0500
+2026-07-23 13:58:18,974 [INFO] Checkpoint epoch 25: best model saved: yes | current loss: 0.403998 | best loss: 0.403998
+2026-07-23 13:58:18,975 [INFO] Global step updated to: 27482
+2026-07-23 13:58:18,975 [INFO] ====== Current epoch 26 ======
+2026-07-23 13:58:18,975 [INFO] Learning rate: 0.0001
+2026-07-23 13:58:20,577 [INFO] [0/1057] | Loss: 0.330 | PSNR: 34.406 | MSE: 0.00036258 | BPP: 0.0511 | QP: 63
+2026-07-23 14:02:33,171 [INFO] [500/1057] | Loss: 0.438 | PSNR: 33.006 | MSE: 0.00050046 | BPP: 0.0534 | QP: 63
+2026-07-23 14:06:46,200 [INFO] [1000/1057] | Loss: 0.440 | PSNR: 32.981 | MSE: 0.00050333 | BPP: 0.0535 | QP: 63
+2026-07-23 14:07:12,556 [INFO] Train epoch 26: Loss: 0.443 | PSNR: 32.950 | MSE: 0.00050700 | BPP: 0.0538
+2026-07-23 14:08:31,402 [INFO] Val epoch 26: Loss: 0.402 | PSNR: 33.399 | MSE: 0.00045721 | BPP: 0.0505
+2026-07-23 14:08:35,293 [INFO] Checkpoint epoch 26: best model saved: yes | current loss: 0.401596 | best loss: 0.401596
+2026-07-23 14:08:35,294 [INFO] Global step updated to: 28539
+2026-07-23 14:08:35,294 [INFO] ====== Current epoch 27 ======
+2026-07-23 14:08:35,294 [INFO] Learning rate: 0.0001
+2026-07-23 14:08:36,916 [INFO] [0/1057] | Loss: 0.606 | PSNR: 31.490 | MSE: 0.00070964 | BPP: 0.0611 | QP: 63
+2026-07-23 14:12:48,898 [INFO] [500/1057] | Loss: 0.455 | PSNR: 32.827 | MSE: 0.00052150 | BPP: 0.0549 | QP: 63

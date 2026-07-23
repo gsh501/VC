@@ -50,3 +50,6 @@ Partvimeo_32/
 !test_uf/codec_outputs/**/*.pth.tar/**
 test_uf/codec_outputs/**/bin/
 test_uf/codec_outputs/**/*.bin
+
+RT/
+compress_reconstruct/

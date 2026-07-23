@@ -43,23 +43,34 @@ tmux rename-session -t 旧名 新名   #重命名会话
 
 cd /home/admin1/gsh/VC
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 /home/admin1/anaconda3/envs/dcvc/bin/python -m torch.distributed.run \
-  --nproc_per_node=4 \
-  train_uf/train_phase_1.py \
-  --train-filelist /home/admin1/Data/data/vimeo_septuplet/train_filelist.txt \
-  --val-filelist /home/admin1/Data/data/vimeo_septuplet/val_filelist.txt \
-  --output-dir ./pretrained_uf \
-  --quality-level 4 \
-  --epochs 120 \
-  --batch-size 4 \
-  --val-batch-size 1 \
-  --num-workers 4
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+/home/admin1/anaconda3/envs/gsh/bin/python -m torch.distributed.run \
+--nproc_per_node=4 \
+train_uf/train_phase_1.py \
+--train-filelist /home/admin1/Data/data/vimeo_septuplet/train_filelist.txt \
+--val-filelist /home/admin1/Data/data/vimeo_septuplet/val_filelist.txt \
+--output-dir /home/admin1/gsh/VC/pretrained_uf \
+--quality-level 4 \
+--epochs 120 \
+--batch-size 4 \
+--val-batch-size 1 \
+--num-workers 4
+
+tensorboard启动：
+cd /home/admin1/gsh/VC
+
+/home/admin1/anaconda3/envs/gsh/bin/tensorboard \
+  --logdir /home/admin1/gsh/VC/pretrained_uf/DCVCUFIntra/4/tensorboard \
+  --port 6006 \
+  --bind_all
+
+网址：http://192.168.10.30:6006
 
 ##3.3测试第一阶段训练结果test_phase_1.py
 
 cd /home/admin1/gsh/VC
 
-/home/admin1/anaconda3/envs/dcvc/bin/python test_uf/test_phase_1.py \
+/home/admin1/anaconda3/envs/gsh/bin/python test_uf/test_phase_1.py \
   --checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUFIntra/2/checkpoint_best_loss_uf_phase_1.pth.tar \
   --device cuda:5 \
   --qps 20
@@ -88,7 +99,7 @@ Ubuntu：
 cd /home/admin1/gsh/VC
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nproc_per_node=4 train_uf/train_phase_2.py \
-  --phase1-checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUFIntra/2/checkpoint_best_loss_uf_phase_1.pth.tar \
+  --phase1-checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUFIntra/4/checkpoint_best_loss_uf_phase_1.pth.tar \
   --train-filelist /home/admin1/gsh/VC/datafiles/train_phase_2/train_filelist_phase2.txt \
   --val-filelist /home/admin1/gsh/VC/datafiles/train_phase_2/val_filelist_phase2.txt \
   --output-dir /home/admin1/gsh/VC/pretrained_uf \
@@ -100,17 +111,27 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nproc_per_node=4 train_uf/train_phase_2.
   --patch-size 256 256 \
   --log-interval 500
   
+tensorboard启动：
+cd /home/admin1/gsh/VC
+
+/home/admin1/anaconda3/envs/gsh/bin/tensorboard \
+  --logdir /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/tensorboard \
+  --port 6006 \
+  --bind_all
+
+网址：http://192.168.10.30:6006
+
 ##4.4测试第二阶段训练结果test_phase_2.py
 cd /home/admin1/gsh/VC
 
 联合权重测试：
-/home/admin1/anaconda3/envs/dcvc/bin/python test_uf/test_phase_2.py \
+/home/admin1/anaconda3/envs/gsh/bin/python test_uf/test_phase_2.py \
   --checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/checkpoint_best_loss_uf_phase_2.pth.tar \
   --device cuda:4 \
   --qps 20
 
 分离权重测试：
-/home/admin1/anaconda3/envs/dcvc/bin/python test_uf/test_phase_2.py \
+/home/admin1/anaconda3/envs/gsh/bin/python test_uf/test_phase_2.py \
   --video-checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/checkpoint_best_loss_uf_phase_2_video.pth.tar \
   --intra-checkpoint /home/admin1/gsh/VC/pretrained_uf/DCVCUF/4/checkpoint_best_loss_uf_phase_2_intra.pth.tar \
   --device cuda:4 \

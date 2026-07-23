@@ -43,32 +43,38 @@ DEFAULT_CHECKPOINT = (
     / "pretrained_uf"
     / "DCVCUF"
     / "4"
-    / "checkpoint_best_loss_uf_phase_2.pth.tar"
+    / "checkpoint_best_qp63_loss_uf_phase_2.pth.tar"
 )
 DEFAULT_VIDEO_CHECKPOINT = (
     REPO_ROOT
     / "pretrained_uf"
     / "DCVCUF"
     / "4"
-    / "checkpoint_best_loss_uf_phase_2_video.pth.tar"
+    / "checkpoint_best_qp63_loss_uf_phase_2_video.pth.tar"
 )
 DEFAULT_INTRA_CHECKPOINT = (
     REPO_ROOT
     / "pretrained_uf"
     / "DCVCUF"
     / "4"
-    / "checkpoint_best_loss_uf_phase_2_intra.pth.tar"
+    / "checkpoint_best_qp63_loss_uf_phase_2_intra.pth.tar"
 )
 DEFAULT_TEST_DATASET = Path("/home/admin1/Data/data/data")
 DEFAULT_TEST_FILELIST = REPO_ROOT / "datafiles" / "train_phase_2" / "test_filelist_phase2.txt"
 
 
-def default_log_path():
+def default_output_dir():
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    return Path(__file__).resolve().parent / f"test_phase_2_{timestamp}.log"
+    output_dir = Path(__file__).resolve().parent / "codec_outputs" / f"test_phase_2_{timestamp}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
 
 
-def default_output_dir(log_path):
+def default_log_path(output_dir):
+    return Path(output_dir).resolve() / f"{Path(output_dir).name}.log"
+
+
+def output_dir_from_log_path(log_path):
     return Path(__file__).resolve().parent / "codec_outputs" / Path(log_path).stem
 
 
@@ -467,13 +473,13 @@ def parse_args(argv):
         "--log-file",
         type=str,
         default=None,
-        help="Path to save console test output. Default: test_uf/test_phase_2_*.log",
+        help="Path to save console test output. Default: test_uf/codec_outputs/test_phase_2_<time>/<same_name>.log",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default=None,
-        help="Directory for .bin files and reconstructed images. Default: test_uf/codec_outputs/<log_name>",
+        help="Directory for .bin files and reconstructed images. Default: same folder as the default log.",
     )
     parser.add_argument("--save-bin", type=str2bool, default=True)
     parser.add_argument("--save-recon", type=str2bool, default=True)
@@ -528,15 +534,16 @@ def main(argv):
     initialize_cuda_device(args.device)
     torch.backends.cudnn.benchmark = args.device.type == "cuda"
 
-    log_path, log_handle, original_stdout = setup_stdout_log(
-        args.log_file if args.log_file is not None else default_log_path()
-    )
-    output_dir = (
-        Path(args.output_dir).resolve()
-        if args.output_dir is not None
-        else default_output_dir(log_path).resolve()
-    )
+    if args.output_dir is not None:
+        output_dir = Path(args.output_dir).resolve()
+    elif args.log_file is not None:
+        output_dir = output_dir_from_log_path(args.log_file).resolve()
+    else:
+        output_dir = default_output_dir().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    log_file = args.log_file if args.log_file is not None else default_log_path(output_dir)
+    log_path, log_handle, original_stdout = setup_stdout_log(log_file)
 
     try:
         checkpoint_path = Path(
